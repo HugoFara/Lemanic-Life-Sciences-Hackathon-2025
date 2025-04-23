@@ -3,8 +3,8 @@ import gradio as gr
 # CI
 # word
 
-def speech_recognition(wav_file, model_type, config_id):
-    return gr.Textbox(f"File: {wav_file}, Processed with model: {model_type}, config: {config_id}")
+def speech_recognition(wav_file, model_type, config_id, threshold):
+    return gr.Textbox(f"File: {wav_file}, Processed with model: {model_type}, config: {config_id}, threshold : {threshold}")
 
 def update_interface(model_type):
     if model_type == "Phoneme Deletion (french)":
