@@ -27,8 +27,8 @@ with gr.Blocks() as demo:
 
     threshold = gr.Slider(0, 100, value=80, label="Threshold")
 
-    phoneme_dropdown = gr.Dropdown(config_list_pho, label="Phoneme Config ID", visible=False)
-    decoding_dropdown = gr.Dropdown(config_list_dec, label="Decoding Config ID", visible=False)
+    phoneme_dropdown = gr.Dropdown(config_list_pho, label="Phoneme Config ID", visible=False, value=None)
+    decoding_dropdown = gr.Dropdown(config_list_dec, label="Decoding Config ID", visible=False, value=None)
     
     
     # Update dropdown visibility based on model selection
