@@ -10,29 +10,31 @@ for coder in ["coder1", "coder2"]:
     print("Preparing data for", coder)
 
     trial_answer = "trial_answer_" + coder
-    labeled_phonemes = data[trial_answer]
+    labeled_phonemes = data[trial_answer][:1]
 
     # Remove all symbols
     labeled_phonemes = (labeled_phonemes
-        .str.replace('.', ' ', regex=False)                  # Replace dots with spaces
-        .str.replace(r'\{.*?\}', '', regex=True)             # Remove {...}
-        .str.replace(r'\<.*?\>', '', regex=True)             # Remove <...>
-        .str.replace(r'\b(?:pause|only_environment)\b', '', regex=True)  # Remove English words
+        .str.replace('.', ' ', regex=False)               # Replace dots with [PAD]
+        .str.replace(r'\{.*?\}', '[UNK]', regex=True)     # Replace {...} with [UNK]
+        .str.replace(r'\<.*?\>', '', regex=True)          # Remove <...>
     )
 
+    new_phonemes = []
     for sentence in labeled_phonemes:
         words = sentence.split()
-        print(words)
         ipa_words = [ipa_encoder.get_french_ipa(word) for word in words]
-        print(ipa_words)
-        ipa_output = " ".join(ipa_words)
-        print(ipa_output)
+        ipa_output = ["".join(item for sublist in ipa_encoder.get_french_ipa(word)for item in sublist) for word in words]
+        new_sentence = " ".join(ipa_output)
+        new_phonemes.append(new_sentence)
+    
+    # Replace spaces with [PAD]
+    labeled_phonemes = pd.Series(new_phonemes)
+    labeled_phonemes = labeled_phonemes.str.replace(' ', '[PAD]', regex=False)     
 
     new_data = data.copy()
     new_data["trial_answer_coder1"] = labeled_phonemes
-    output_path = "Data/Processed" + coder
+    output_path = "Data/Processed/" + coder
     new_data.to_csv(output_path, index=True)
-
 
 
 
