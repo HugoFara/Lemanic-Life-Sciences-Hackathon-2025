@@ -1,0 +1,4 @@
+file_name,words,pho
+audio1.wav,"['Vuso,', 'Segaclofeno,', 'Raviglio,']","[['pho1', 'pho2'], ['pho3', 'pho4'], ['pho5']]"
+audio2.wav,"['Il', 'truppo', 'smog,']","[['pho1', 'pho2', 'pho3'], ['pho3'], []]"
+audio3.wav,"['Strade,', 'minestra,']","[['pho3'], []]"
