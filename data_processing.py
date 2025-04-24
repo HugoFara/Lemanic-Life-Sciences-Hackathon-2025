@@ -1,74 +1,88 @@
 import pandas as pd
 import re
 import ipa_encoder
+from tqdm import tqdm
+import numpy as np
 
-file_path_it = "data/1_Ground_truth/Decoding_ground_truth_IT.csv"
-file_path_fr = "data/1_Ground_truth/Phoneme_Deleletion_ground_truth_FR.csv"
+file_paths = {
+    "it": "data/1_Ground_truth/Decoding_ground_truth_IT.csv",
+    "fr": "data/1_Ground_truth/Phoneme_Deleletion_ground_truth_FR.csv",
+}
+
 phonoemes = []
-for file_path in [file_path_it, file_path_fr]:
+
+for lang, file_path in file_paths.items():
     data = pd.read_csv(file_path)
-    new_data = data.copy()
-    coder = "coder1"
+    new_data = pd.DataFrame()
+    if lang == "fr":
+        coder = "coder1"
+    elif lang == "it":
+        coder = "coder2"
 
-    print("Preparing data for", coder)
+    print(f"Preparing data for {coder} in language: {lang.upper()}")
 
-    trial_answer = "trial_answer_" + coder
+    trial_answer = f"trial_answer_{coder}"
     labeled_phonemes = data[trial_answer]
-
-    # Remove all symbols
+    new_data["file_name"] = data["file_name"]
+    # Clean symbols
     labeled_phonemes = (
-        labeled_phonemes.str.replace(".", " ", regex=False)  # Replace dots with [PAD]
-        .str.replace(r"\{.*?\}", "[UNK]", regex=True)  # Replace {...} with [UNK]
-        .str.replace(r"\<.*?\>", "", regex=True)  # Remove <...>
+        labeled_phonemes.str.replace(".", " ", regex=False)
+        .str.replace(r"\{.*?\}", " [UNK] ", regex=True)
+        .str.replace(r"\<.*?\>", "", regex=True)
+        .str.replace(" ", " [PAD] ", regex=False)
     )
+    labeled_phonemes = labeled_phonemes.fillna("[UNK]")
 
     new_phonemes = []
-    for sentence in labeled_phonemes:
+
+    print(f"Processing {len(labeled_phonemes)} sentences in {lang.upper()}...")
+
+    for sentence in tqdm(labeled_phonemes, desc=f"{lang.upper()} phonemizing"):
         words = sentence.split()
-        ipa_output = [
-            "".join(
-                item for sublist in ipa_encoder.get_french_ipa(word) for item in sublist
-            )
-            for word in words
-        ]
-        new_sentence = " ".join(ipa_output)
+
+        if lang == "fr":
+            ipa_output_nested = ipa_encoder.get_french_ipa(words)
+            ipa_output = ["".join(sublist) for sublist in ipa_output_nested]
+        elif lang == "it":
+            ipa_output_nested = ipa_encoder.get_italian_ipa(words)
+            ipa_output = ["".join(sublist) for sublist in ipa_output_nested]
+        else:
+            raise ValueError(f"Unsupported language: {lang}")
+
+        new_sentence = "".join(ipa_output)
+        new_sentence = new_sentence.replace(" ", "")
         new_phonemes.append(new_sentence)
 
     # Replace spaces with [PAD]
-    labeled_phonemes = pd.Series(new_phonemes)
-    labeled_phonemes = labeled_phonemes.str.replace(" ", "[PAD]", regex=False)
 
-    column = "trial_answer_" + coder + "_phoneme"
-    new_data[column] = labeled_phonemes
-    phonoemes_tmp = new_data[column].astype(str).unique()
-    phonoemes_tmp = "".join(phonoemes_tmp)
+    column = f"trial_answer_{coder}_phoneme"
+    print(f"Adding column: {column}")
+    print(new_data["file_name"])
+    new_data[column] = new_phonemes
+    print(new_data)
+    phonoemes_tmp = "".join(new_data[column].astype(str).unique())
     phonoemes.append(phonoemes_tmp)
-    output_path = "data/Processed/" + file_path.split("/")[-1].split(".")[0]
 
-    new_data.to_csv(output_path + ".csv", index=True)
+    output_base = file_path.split("/")[-1].split(".")[0]
+    new_data.to_csv(f"data/processed/2_{output_base}.csv", index=True)
 
-    # save the unique phonemes to a file
-    with open(
-        "data/Processed/phonemes" + file_path.split("/")[-1].split(".")[0] + ".txt", "w"
-    ) as f:
+    with open(f"data/processed/phonemes_{output_base}.txt", "w") as f:
         f.write("".join(phonoemes))
-        print("Data prepared and saved to", output_path)
+        print(f"Data prepared and saved to data/processed/{output_base}.csv")
 
 
+# Extract unique phonemes
 def extract_unique_phonemes(phoneme_str):
-    # Match [PAD] or [UNK] as units, and then single characters
     pattern = r"\[PAD\]|\[UNK\]|."
     phonemes = re.findall(pattern, phoneme_str)
-    unique_phonemes = list(
-        dict.fromkeys(phonemes)
-    )  # preserves order, removes duplicates
-    return unique_phonemes
+    return list(dict.fromkeys(phonemes))
 
 
 phonoemes = "".join(phonoemes)
 unique_phonemes = extract_unique_phonemes(phonoemes)
-# Save unique phonemes to a file
-with open("data/Processed/unique_phonemes.txt", "w") as f:
+
+with open("data/processed/unique_phonemes2.txt", "w") as f:
     for phoneme in unique_phonemes:
         f.write(phoneme + "\n")
-print("Unique phonemes extracted and saved to data/Processed/unique_phonemes.txt")
+
+print("Unique phonemes extracted and saved to data/processed/unique_phonemes.txt")

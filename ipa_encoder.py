@@ -5,10 +5,13 @@ For now it works on French and is based on https://huggingface.co/Marxav/frpron
 
 It uses a GPT2 model, that may be quite old.
 """
+
 import re
+from phonemizer import phonemize
 
 import torch
 import transformers
+from phonemizer import phonemize
 
 
 def preprocessor(sentences):
@@ -77,25 +80,79 @@ def post_process(predictions, remove_special_characters=True):
         generated_text = prediction["generated_text"]
         if remove_special_characters:
             generated_text = re.sub(r"[^\w:]", "", generated_text)
-        output[i] = generated_text[generated_text.index(":") + 1:]
+        output[i] = generated_text[generated_text.index(":") + 1 :]
     return output
 
 
-def get_french_ipa(input_text, generator=None):
+def get_french_ipa(words):
     """
-    Return the IPA of a text, using a GPT2 model.
+    Convert a list of words to IPA for Italian using phonemizer,
+    skipping special tokens like [PAD], [UNK], etc.
 
-    :param list[str] input_text: Text to use, non-word characters will be discarded.
-    :param generator: IPA generator to use.
-    :return list[str]: List where each word is converted to IPA.
+    :param list[str] words: List of words
+    :return list[list[str]]: IPA-transcribed words or original token if special
     """
+    ipa_output = []
+    normal_words = []
+    word_indices = []
 
-    sentences_list = preprocessor(input_text)
-    if generator is None:
-        generator = get_generator()
-    predictions = generator.predict(sentences_list)
+    for i, word in enumerate(words):
+        if word == "[PAD]":
+            word_indices.append(0)
+        elif word == "[UNK]":
+            word_indices.append(1)
+        else:
+            normal_words.append(word)
+            word_indices.append(2)
 
-    return [post_process(prediction) for prediction in predictions]
+    # Phonemize only non-special tokens
+    phonemized = phonemize(normal_words, language="fr-fr", backend="espeak")
+    for i, word in enumerate(words):
+        if word_indices[i] == 0:
+            ipa_output.append("[PAD]")
+        elif word_indices[i] == 1:
+            ipa_output.append("[UNK]")
+        else:
+            ipa_output.append(phonemized.pop(0))
+
+    return ipa_output
+
+
+SPECIAL_TOKENS = {"[PAD]", "[UNK]"}
+
+
+def get_italian_ipa(words):
+    """
+    Convert a list of words to IPA for Italian using phonemizer,
+    skipping special tokens like [PAD], [UNK], etc.
+
+    :param list[str] words: List of words
+    :return list[list[str]]: IPA-transcribed words or original token if special
+    """
+    ipa_output = []
+    normal_words = []
+    word_indices = []
+
+    for i, word in enumerate(words):
+        if word == "[PAD]":
+            word_indices.append(0)
+        elif word == "[UNK]":
+            word_indices.append(1)
+        else:
+            normal_words.append(word)
+            word_indices.append(2)
+
+    # Phonemize only non-special tokens
+    phonemized = phonemize(normal_words, language="it", backend="espeak", strip=True)
+    for i, word in enumerate(words):
+        if word_indices[i] == 0:
+            ipa_output.append("[PAD]")
+        elif word_indices[i] == 1:
+            ipa_output.append("[UNK]")
+        else:
+            ipa_output.append(phonemized.pop(0))
+
+    return ipa_output
 
 
 if __name__ == "__main__":
@@ -103,4 +160,4 @@ if __name__ == "__main__":
     text = "bonjour"
 
     print(get_french_ipa([text]))
-    #print(process_from_model([text]))
+    # print(process_from_model([text]))
