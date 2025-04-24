@@ -77,7 +77,7 @@ config_list_dec = ['config_A_complex_1', 'config_A_complex_2', 'config_A_easy_1'
 
 with gr.Blocks(theme=gr.themes.Soft()) as demo: #Other themes that are nice : gr.themes.Default() / gr.themes.Base()
     gr.Markdown("#🎙️ Speech Recognition Interface")
-    gr.Markdown("Upload or record an audio file, choose a model and config, and get predictions.")
+    gr.Markdown("Upload or record an audio file, choose a model and config, and get an assessment.")
 
     with gr.Row():
         with gr.Column(scale=2):
