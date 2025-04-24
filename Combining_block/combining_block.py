@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import ast
 
-def combine_decoding(pho_path, whisper_path, model=None, first_phonemes_csv=None, training=False):
+def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phonemes_csv=None, training=False):
     """
     Case where decoding model
     """
@@ -42,11 +42,12 @@ def combine_decoding(pho_path, whisper_path, model=None, first_phonemes_csv=None
     #Merge the two dataframes
     merged_df = pd.merge(seperated_whisper_df, seperated_pho_df, on='file_name', how='inner')
 
-    if model=="French":
+    """if model=="French":
         experimental_data_df = pd.read_csv("ground_truth.csv", index_col="file_name")
     else:
-        experimental_data_df = pd.read_csv("ground_truth.csv", index_col="file_name")
-
+        experimental_data_df = pd.read_csv("ground_truth.csv", index_col="file_name")"""
+    
+    experimental_data_df = pd.read_csv(csv_file, index_col="file_name")
     
     result = []
     if training:
