@@ -1,4 +1,0 @@
-file_name,API_target,pho_proba,accuracy
-audio1.wav,vuso;seca;clofeno,"[[[1], [1]], [[1], [1]], [[1]]]","[[1, 0, 1], [1, 0, 1]]"
-audio2.wav,vuso;seca;clofeno,"[[[1], [1], [1]], [[1]], []]","[[1, 0, 1], [1, 0, 1]]"
-audio3.wav,vuso;seca,"[[[1]], []]","[[1, 1], [1, 0]]"
