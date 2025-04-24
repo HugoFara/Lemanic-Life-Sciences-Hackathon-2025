@@ -74,9 +74,11 @@ def speech_recognition(wav_file, csv_file, model_type):
     whisper_path = "whisper.csv"
     apply_whisper(wav_file, csv_file, language, whisper_path)
     whisper_output = pd.read_csv(whisper_path)
-    final_words = whisper_output['final_words'].apply(ast.literal_eval)
+    final_words_raw = whisper_output.loc[0, 'final_words']
+    cleaned = final_words_raw.replace('np.float64(', '').replace(')', '')
+    final_words = ast.literal_eval(cleaned)
     words = [pair[0] for pair in final_words]
-    whisper_result = f"{len(words)} words detected : {words}"
+    whisper_result = f"{len(words)} words detected: {words}"
 
     #Run Wav2vec2
     pho_path = "pho_output.csv"
