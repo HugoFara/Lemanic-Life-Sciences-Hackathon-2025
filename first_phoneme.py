@@ -1,7 +1,6 @@
 from ipa_encoder import get_french_ipa
 import pandas as pd
 
-<<<<<<< HEAD
 def first_phoneme_extraction(data_csv):
     """
     Extracts the first phoneme from the phoneme data.
@@ -44,9 +43,7 @@ for _, row in df.iterrows():
     word_in_pho.append({"file name" : file_name_df, "first_pho" : w[0]}) # Here we should take the first phoneme of the word !! --> cannot run so don't know the data type of w
 
 word_in_pho_df = pd.DataFrame(word_in_pho)
-<<<<<<< HEAD
-word_in_pho_df.to_csv('', index=False)"""
-=======
-word_in_pho_df.to_csv('phonem_test.csv', index=False)
->>>>>>> 47d3a9310f4916078363401e326ea7bff482fae7
+
+word_in_pho_df.to_csv('phonem_test.csv', index=False)"""
+
     
