@@ -26,6 +26,7 @@ def combine_decoding(pho_path, whisper_path):
     pho_output = pd.read_csv(pho_path) #Be careful the pho_output.csv data should be in the same format as seperated_whisper_df --> file name / list of words / list of timestamps
     pho_output['pho'] = pho_output['pho'].apply(ast.literal_eval)
     pho_output['pho_timestamps'] = pho_output['pho_timestamps'].apply(ast.literal_eval)
+    #pho_output['pho_probas'] = pho_output['pho_probas'].apply(ast.literal_eval)
 
     #Merge the two dataframes
     merged_df = pd.merge(seperated_whisper_df, pho_output, on='file_name', how='inner')
@@ -37,23 +38,28 @@ def combine_decoding(pho_path, whisper_path):
         timestamps = row['words_timestamps']
         index2 = 0 
         pho_row_result = []
+        probas_row_result = []
         
         for index, word in enumerate(words):
             list_of_pho = []
+            #list_of_probas = []
             length = len(row["pho_timestamps"])
             
             while index2 < length and row["pho_timestamps"][index2][0] <= timestamps[index][1]:
                 if ((timestamps[index][0] <= row["pho_timestamps"][index2][0] <= timestamps[index][1]) or (timestamps[index][0] <= row["pho_timestamps"][index2][1] <= timestamps[index][1])):
                     list_of_pho.append(row["pho"][index2])
+                    #list_of_probas.append(row["pho_probas"][index2])
                 index2+=1
 
             if index2-1 >= 0 and row["pho"][index2-1] not in list_of_pho:
                 if ((timestamps[index][0] <= row["pho_timestamps"][index2-1][0] <= timestamps[index][1]) or (timestamps[index][0] <= row["pho_timestamps"][index2-1][1] <= timestamps[index][1])):
                     list_of_pho.append(row["pho"][index2-1])
+                    #list_of_probas.append(row["pho_probas"][index2-1])
             
             pho_row_result.append(list_of_pho)
+            #probas_row_result.append(list_of_probas)
             
-        result.append({'file_name': row['file_name'], 'words': words, 'pho': pho_row_result})
+        result.append({'file_name': row['file_name'], 'words': words, 'pho': pho_row_result}) #, 'probas': probas_row_result})
         
     result = pd.DataFrame(result)
     return result
@@ -64,9 +70,14 @@ def model_detection(pho_path, whisper_path=None):
     Detects which model is being used
     """
     if whisper_path is None:
-        return pd.read_csv(pho_path)
+        pho_output = pd.read_csv(pho_path) #Be careful the pho_output.csv data should be in the same format as seperated_whisper_df --> file name / list of words / list of timestamps
+        pho_output['pho'] = pho_output['pho'].apply(ast.literal_eval)
+        pho_output['pho_timestamps'] = pho_output['pho_timestamps'].apply(ast.literal_eval)
+        #pho_output['pho_probas'] = pho_output['pho_probas'].apply(ast.literal_eval)
+        return pho_output
     else:
         return combine_decoding(pho_path, whisper_path)
+    
 
 if __name__ == "__main__":
     result = model_detection("pho_output.csv", "whisper_output.csv")
