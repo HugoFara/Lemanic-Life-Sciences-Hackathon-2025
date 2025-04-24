@@ -50,6 +50,7 @@ def speech_recognition(wav_file, csv_file, model_type):
 
 import Whisper.pipeline as wis
 from Combining_block.combining_block import combine_decoding
+from first_phoneme import first_phoneme_extraction
 
 import pandas as pd
 import numpy as np
@@ -85,8 +86,13 @@ def speech_recognition(wav_file, csv_file, model_type):
     #apply_pho() #TODO
     
     #Combine the outputs
-    #combine_decoding(pho_path, whisper_path, model=model_type, csv_file=csv_file)
 
+    """if model_type == 'Phoneme Deletion (french)':
+        phonem_test = first_phoneme_extraction(csv_file) #Create a CSV file with the first phoneme of each word --> also saved with can be changed
+        combine_decoding(pho_path, whisper_path, csv_file=csv_file, model=model_type, first_phonemes_csv=phonem_test)
+    else: 
+        combine_decoding(pho_path, whisper_path, csv_file=csv_file, model=model_type)
+"""
     return whisper_result
 
 if __name__ == "__main__":
