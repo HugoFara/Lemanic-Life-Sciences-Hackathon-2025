@@ -94,7 +94,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo: #Other themes that are nice : gr
         config = pho_config if model_type == "Phoneme Deletion (french)" else dec_config
         return speech_recognition(audio, model_type, config, threshold)
 
-    run_button = gr.Button("🚀 Run Model", size="lg")
+    run_button = gr.Button("🚀 Run Model", size="lg", variant="primary")
     output_box = gr.Textbox(label="📤 Output", lines=5, interactive=False)
 
     run_button.click(
