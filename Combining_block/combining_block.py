@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import ast
 
-def combine_decoding(pho_path, whisper_path, model=None, training=False):
+def combine_decoding(pho_path, whisper_path, first_phonemes_csv=None, model=None, training=False):
     """
     Case where decoding model
     """
@@ -78,7 +78,14 @@ def combine_decoding(pho_path, whisper_path, model=None, training=False):
             pho_row_result.append(list_of_pho)
             
         result.append({'file_name': file_name, 'API_target': API_row, 'pho_proba': pho_row_result})
-        
+
+        #Optional first phoneme addition column
+        if model=="French":
+            first_phonemes_df = pd.read_csv(first_phonemes_csv, index_col="file_name")
+            result.append({'file_name': file_name, 'API_target': API_row, 'pho_proba': pho_row_result, 'first_phoneme': first_phonemes_df.loc[file_name, "first_phoneme"]})
+        else:
+            result.append({'file_name': file_name, 'API_target': API_row, 'pho_proba': pho_row_result}) # We can fill it with a None column if necessary 
+
         #Optional accuracy display
         if training:    
             accuracy1 = experimental_data_df.loc[file_name, "accuracy_coder1"]
