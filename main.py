@@ -96,8 +96,8 @@ def speech_recognition(wav_file, csv_file, model_type):
     return whisper_result
 
 if __name__ == "__main__":
-    wav_file = "C:/EPFL\Hackathon/2_Audiofiles\Phoneme_Deletion_FR_T1/3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_2249c5f2f75d4b089bee1f36e1a7aef2.wav"
-    csv_file = "C:\EPFL\Hackathon\Lemanic-Life-Sciences-Hackathon-2025\interface_data_FR.csv"
+    wav_file = "C:/EPFL/Hackathon/2_Audiofiles/Phoneme_Deletion_FR_T1/3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_3eff2b8d9be54f24aaa5f0bf3ef81c50.wav"
+    csv_file = "C:\EPFL\Hackathon\interface_data.csv"
     model_type = "Phoneme Deletion (french)"
     
     speech_recognition(wav_file, csv_file, model_type)
