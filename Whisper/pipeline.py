@@ -321,10 +321,11 @@ def main_(csv_path, wav_file, language, output_csv):
     
     print("=== Cleaning.... ===")
     
-    cleaned_words = clean_output(words) # takes care of punctuation, stutter, repetition and concatenation
-    final_words = correct_segments(cleaned_words, matched_row["config_list"].values[0]) #  adapts guessed words using targets
-    replaced_words = replace_whisper_words_with_reference(final_words, matched_row["config_list"].values[0]) # replace guessed words with target words
-    
+    if language == "it":
+        cleaned_words = clean_output(words) # takes care of punctuation, stutter, repetition and concatenation
+        final_words = correct_segments(cleaned_words, matched_row["config_list"].values[0]) #  adapts guessed words using targets
+        replaced_words = replace_whisper_words_with_reference(final_words, matched_row["config_list"].values[0]) # replace guessed words with target words
+        
     print("=== Saving.... ===")
     
     df_final = pd.DataFrame({
@@ -340,8 +341,8 @@ def main_(csv_path, wav_file, language, output_csv):
 
 if __name__ == "__main__":
     
-    csv_path = "/pvc/scratch/speech_recognition/Hackathon_ASR/1_Ground_truth/Decoding_ground_truth_IT.csv"
-    wav_file = "/pvc/scratch/speech_recognition/Hackathon_ASR/2_Audiofiles/Decoding_IT_T1/102_edugame2023_32c4a5e851c1431aba3aa409e3be8128_649d404f44214261b67b24f1845e1350.wav"
+    csv_path = "C:\EPFL\Hackathon\Lemanic-Life-Sciences-Hackathon-2025\interface_data.csv"
+    wav_file = "C:/EPFL/Hackathon/2_Audiofiles/Decoding_IT_T1/102_edugame2023_32c4a5e851c1431aba3aa409e3be8128_649d404f44214261b67b24f1845e1350.wav"
     language = "it" # "fr" or "it"
     output_csv = "final_words.csv"
     
