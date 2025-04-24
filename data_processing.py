@@ -10,7 +10,7 @@ for coder in ["coder1", "coder2"]:
     print("Preparing data for", coder)
 
     trial_answer = "trial_answer_" + coder
-    labeled_phonemes = data[trial_answer][:1]
+    labeled_phonemes = data[trial_answer]
 
     # Remove all symbols
     labeled_phonemes = (labeled_phonemes
@@ -33,7 +33,7 @@ for coder in ["coder1", "coder2"]:
 
     new_data = data.copy()
     new_data["trial_answer_coder1"] = labeled_phonemes
-    output_path = "Data/Processed/" + coder
+    output_path = "Processed_" + coder
     new_data.to_csv(output_path, index=True)
 
 
