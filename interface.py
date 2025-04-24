@@ -70,12 +70,12 @@ config_list_pho = ['phondel_A_pseudo_0', 'phondel_A_pseudo_1', 'phondel_A_pseudo
 config_list_dec = ['config_A_complex_1', 'config_A_complex_2', 'config_A_easy_1', 'config_A_easy_2', 'config_A_pseudo_1', 'config_A_pseudo_2', 'config_B_complex_1', 'config_B_complex_2', 'config_B_easy_1', 'config_B_easy_2', 'config_B_pseudo_1', 'config_B_pseudo_2', 'config_C_complex_1', 'config_C_complex_2', 'config_C_easy_1', 'config_C_easy_2', 'config_C_pseudo_1', 'config_C_pseudo_2']
 
 with gr.Blocks(theme=gr.themes.Soft()) as demo: #Other themes that are nice : gr.themes.Default() / gr.themes.Base()
-    gr.Markdown("# 🎙️ Speech Recognition Interface")
+    gr.Markdown("#🎙️ Speech Recognition Interface")
     gr.Markdown("Upload or record an audio file, choose a model and config, and get predictions.")
 
     with gr.Row():
         with gr.Column(scale=2):
-            audio_input = gr.Audio(sources=["upload", "microphone"], type="filepath", format="wav", label="🎵 Upload or record a .wav file") #Here take of the note emoji or take it of from the
+            audio_input = gr.Audio(sources=["upload", "microphone"], type="filepath", format="wav", label="Upload or record a .wav file") #Here take of the note emoji or take it of from the
         with gr.Column(scale=1):
             model_selector = gr.Radio(["Phoneme Deletion (french)", "Decoding (italian)"], label="🧠 Model Type", value="Phoneme Deletion (french)")
             phoneme_dropdown = gr.Dropdown(config_list_pho, label="Phoneme Config ID", visible=True)
