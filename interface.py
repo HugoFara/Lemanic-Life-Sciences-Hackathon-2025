@@ -71,12 +71,16 @@ if __name__ == "__main__":
     demo.launch()'''
 
 # WE CONSIDER THAT A CSV IS ALWAYS GIVEN
-#from main import speech_recognition
+from main import speech_recognition
 import gradio as gr
+import os
+
 
 def run_model(wav_file, csv_file, model_type):
-    #speech_recognition(wav_file, csv_file, model_type)
-    return f"🎵 Audio File: {wav_file}\n✅ CSV file: {csv_file}🎯"
+    wav_file = os.path.abspath(wav_file)
+    csv_file = os.path.abspath(csv_file)
+    results = speech_recognition(wav_file, csv_file, model_type)
+    return f"🎵 Audio File: {wav_file}\n✅ CSV file: {csv_file}🎯" + results
 
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
     gr.Markdown("# Speech Recognition Interface 🎙️")
