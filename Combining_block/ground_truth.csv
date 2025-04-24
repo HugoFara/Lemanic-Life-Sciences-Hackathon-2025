@@ -1,0 +1,4 @@
+file_name,participant_id,phase,language,form,config_id,API_target,accuracy_coder1,accuracy_coder2
+audio1.wav,1001,PSEUDO,it,B,config_B_pseudo_1,vuso;seca;clofeno,1 0 1,1 0 1
+audio2.wav,1001,PSEUDO,it,B,config_B_pseudo_2,vuso;seca;clofeno,1 0 1,1 0 1
+audio3.wav,1001,WORD,it,B,config_B_complex_2,vuso;seca,1 1,1 0
