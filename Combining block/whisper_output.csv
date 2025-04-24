@@ -1,0 +1,4 @@
+file_name,aligned_segments,len_segments
+audio1.wav,"[['Vuso,', [0.0, 2.66]], ['Segaclofeno,', [2.88, 4.94]], ['Raviglio,', [5.16, 6.72]]]",3
+audio2.wav,"[['Il', [0.0, 2.38]], ['truppo', [2.38, 3.24]], ['smog,', [3.24, 4.7]]]",3
+audio3.wav,"[['Strade,', [3.88, 5.28]], ['minestra,', [5.28, 6.68]]]",2
