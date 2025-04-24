@@ -81,8 +81,8 @@ def speech_recognition(wav_file, csv_file, model_type):
     #combine_decoding(pho_path, whisper_path, model=model_type, csv_file=csv_file)
 
 if __name__ == "__main__":
-    wav_file = "C:/EPFL/Hackathon/2_Audiofiles/Phoneme_Deletion_FR_T1/3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_3eff2b8d9be54f24aaa5f0bf3ef81c50.wav"
-    csv_file = "C:\EPFL\Hackathon\interface_data.csv"
-    model_type = "Phoneme Deletion (french)"
+    wav_file = "/Users/melina/Desktop/Hackathon/Hackathon_ASR/2_Audiofiles/Phoneme_Deletion_FR_T1/3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_3eff2b8d9be54f24aaa5f0bf3ef81c50.wav"
+    csv_file = "/Users/melina/Desktop/Hackathon/Lemanic-Life-Sciences-Hackathon-2025/interface_data.csv"
+    model_type = "Decoding (italian)"
     
     speech_recognition(wav_file, csv_file, model_type)
