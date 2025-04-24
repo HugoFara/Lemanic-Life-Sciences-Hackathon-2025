@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import ast
 
-def combine_decoding(pho_path, whisper_path, first_phonemes_csv=None, model=None, training=False):
+def combine_decoding(pho_path, whisper_path, model=None, first_phonemes_csv=None, training=False):
     """
     Case where decoding model
     """
