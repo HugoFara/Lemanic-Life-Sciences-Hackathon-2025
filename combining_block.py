@@ -49,7 +49,6 @@ def combine_decoding(pho_path, whisper_path, model=None, training=False):
         timestamps = row['words_timestamps']
         index2 = 0 
         pho_row_result = []
-        probas_row_result = []
         
         for index, word in enumerate(words):
             list_of_pho = []
@@ -70,19 +69,17 @@ def combine_decoding(pho_path, whisper_path, model=None, training=False):
     result = pd.DataFrame(result)
 
     if model=="French":
-        experimental_data_df = pd.read_csv(r"C:\Users\tiago\Desktop\EPFL\Hackaton_2025\1_Ground_truth\Phoneme_Deleletion_ground_truth_FR.csv")
+        experimental_data_df = pd.read_csv("Lemanic-Life-Sciences-Hackathon-2025\ground_truth.csv")
 
     elif model=="Italian":
-        experimental_data_df = pd.read_csv(r"C:\Users\tiago\Desktop\EPFL\Hackaton_2025\1_Ground_truth\Decoding_ground_truth_IT.csv")
+        experimental_data_df = pd.read_csv("Lemanic-Life-Sciences-Hackathon-2025\ground_truth.csv")
 
     if training:    
         accuracy = []
         for _, row in result.iterrows():
             file_name = row['file_name']
             experimental_row_df = experimental_data_df[experimental_data_df['file_name'] == file_name]
-            row_accuracy = []
-            row_accuracy.append(experimental_row_df["accuracy_coder1"])
-            row_accuracy.append(experimental_row_df["accuracy_coder2"])
+            row_accuracy = [experimental_row_df["accuracy_coder1"], experimental_row_df["accuracy_coder2"]]
             accuracy.append({'file_name': file_name,'accuracy': row_accuracy})
         accuracy_df = pd.DataFrame(accuracy)
 
@@ -91,5 +88,5 @@ def combine_decoding(pho_path, whisper_path, model=None, training=False):
     return result
 
 if __name__ == "__main__":
-    result = combine_decoding("pho_output.csv", "whisper_output.csv","French", training=True)
-    result.to_csv("combined_output.csv", index=False)
+    result = combine_decoding("Lemanic-Life-Sciences-Hackathon-2025\pho_output.csv", "Lemanic-Life-Sciences-Hackathon-2025\whisper_output.csv","French", training=True)
+    result.to_csv("Lemanic-Life-Sciences-Hackathon-2025\combined_output.csv", index=False)
