@@ -8,15 +8,17 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
     """
     #Load whisper data
     whisper_output = pd.read_csv(whisper_path)
-    whisper_output['aligned_segments'] = whisper_output['aligned_segments'].apply(ast.literal_eval)
-
+    final_words_raw = whisper_output.loc[0, 'final_words']
+    whisper_output['final_words'] = final_words_raw.replace('np.float64(', '').replace(')', '')
+    whisper_output['final_words'] = whisper_output['final_words'].apply(ast.literal_eval)
+    
     #Data arrangement
     seperated_whisper = []
     for _, row in whisper_output.iterrows():
         file_name = row['file_name']
-        segments = row['aligned_segments']
+        segments = row['final_words']
 
-        words = [pair[0] for pair in segments]
+        words = [str(pair[0]) for pair in segments]
         timestamps = [pair[1] for pair in segments]
 
         seperated_whisper.append({'file_name': file_name, 'words': words, 'words_timestamps': timestamps})
@@ -24,7 +26,8 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
 
     #Load pho data
     pho_output = pd.read_csv(pho_path) #Be careful the pho_output.csv data should be in the same format as seperated_whisper_df --> file name / list of words / list of timestamps
-    pho_output['probabilities'] = pho_output['probabilities'].apply(ast.literal_eval) #VOIR LE NOM DE LA COLONNE DANS LE CSV
+    pho_output['probabilities'] = pho_output['probabilities'].apply(ast.literal_eval)
+    pho_output['timestamps'] = pho_output['timestamps'].apply(ast.literal_eval)
 
     """#Data arrangement
     seperated_pho = []
@@ -77,13 +80,11 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
                     list_of_pho.append(row["probabilities"][index2-1])
             
             pho_row_result.append(list_of_pho)
-            
-        result.append({'file_name': file_name, 'API_target': API_row, 'probabilities': pho_row_result})
 
         #Optional first phoneme addition column
-        if model=="French":
+        if model=="Phoneme Deletion (french)":
             first_phonemes_df = pd.read_csv(first_phonemes_csv, index_col="file_name")
-            result.append({'file_name': file_name, 'API_target': API_row, 'pho_proba': pho_row_result, 'first_phoneme': first_phonemes_df.loc[file_name, "first_phoneme"]})
+            result.append({'file_name': file_name, 'API_target': API_row, 'pho_proba': pho_row_result, 'first_phoneme': first_phonemes_df.loc[file_name, "first_pho"][0]})
         else:
             result.append({'file_name': file_name, 'API_target': API_row, 'pho_proba': pho_row_result}) # We can fill it with a None column if necessary 
 
@@ -104,5 +105,5 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
 
 
 if __name__ == "__main__":
-    result = combine_decoding("pho_output.csv", "whisper_output.csv","French", training=True)
+    result = combine_decoding("output_FR.csv", "whisper.csv","interface_data_FR.csv", "Phoneme Deletion (french)", "C:\EPFL\Hackathon\Lemanic-Life-Sciences-Hackathon-2025\phonem_test.csv", training=False)
     result.to_csv("combined_output.csv", index=False)
