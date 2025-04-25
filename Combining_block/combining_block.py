@@ -24,9 +24,9 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
 
     #Load pho data
     pho_output = pd.read_csv(pho_path) #Be careful the pho_output.csv data should be in the same format as seperated_whisper_df --> file name / list of words / list of timestamps
-    pho_output['pho_list'] = pho_output['pho_list'].apply(ast.literal_eval) #VOIR LE NOM DE LA COLONNE DANS LE CSV
+    pho_output['probabilities'] = pho_output['probabilities'].apply(ast.literal_eval) #VOIR LE NOM DE LA COLONNE DANS LE CSV
 
-    #Data arrangement
+    """#Data arrangement
     seperated_pho = []
     for _, row in pho_output.iterrows():
         file_name = row['file_name']
@@ -37,10 +37,10 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
 
         seperated_pho.append({'file_name': file_name, 'pho_proba': pho_proba, 'pho_timestamps': timestamps})
     seperated_pho_df = pd.DataFrame(seperated_pho)
-
+    """
 
     #Merge the two dataframes
-    merged_df = pd.merge(seperated_whisper_df, seperated_pho_df, on='file_name', how='inner')
+    merged_df = pd.merge(seperated_whisper_df, pho_output, on='file_name', how='inner')
 
     """if model=="French":
         experimental_data_df = pd.read_csv("ground_truth.csv", index_col="file_name")
@@ -64,21 +64,21 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
         
         for index, word in enumerate(words):
             list_of_pho = []
-            length = len(row["pho_timestamps"])
+            length = len(row["timestamps"])
             
             #Pho association to words by timestamps
-            while index2 < length and row["pho_timestamps"][index2][0] <= timestamps[index][1]:
-                if ((timestamps[index][0] <= row["pho_timestamps"][index2][0] <= timestamps[index][1]) or (timestamps[index][0] <= row["pho_timestamps"][index2][1] <= timestamps[index][1])):
-                    list_of_pho.append(row["pho_proba"][index2])
+            while index2 < length and row["timestamps"][index2][0] <= timestamps[index][1]:
+                if ((timestamps[index][0] <= row["timestamps"][index2][0] <= timestamps[index][1]) or (timestamps[index][0] <= row["timestamps"][index2][1] <= timestamps[index][1])):
+                    list_of_pho.append(row["probabilities"][index2])
                 index2+=1
 
-            if index2-1 >= 0 and row["pho_proba"][index2-1] not in list_of_pho:
-                if ((timestamps[index][0] <= row["pho_timestamps"][index2-1][0] <= timestamps[index][1]) or (timestamps[index][0] <= row["pho_timestamps"][index2-1][1] <= timestamps[index][1])):
-                    list_of_pho.append(row["pho_proba"][index2-1])
+            if index2-1 >= 0 and row["probabilities"][index2-1] not in list_of_pho:
+                if ((timestamps[index][0] <= row["timestamps"][index2-1][0] <= timestamps[index][1]) or (timestamps[index][0] <= row["timestamps"][index2-1][1] <= timestamps[index][1])):
+                    list_of_pho.append(row["probabilities"][index2-1])
             
             pho_row_result.append(list_of_pho)
             
-        result.append({'file_name': file_name, 'API_target': API_row, 'pho_proba': pho_row_result})
+        result.append({'file_name': file_name, 'API_target': API_row, 'probabilities': pho_row_result})
 
         #Optional first phoneme addition column
         if model=="French":
