@@ -104,5 +104,10 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
 
 
 if __name__ == "__main__":
-    result = combine_decoding("pho_output.csv", "whisper_output.csv","French", training=True)
-    result.to_csv("combined_output.csv", index=False)
+    result = combine_decoding(
+        "Combining_block/pho_output.csv",
+        "Combining_block/whisper_output.csv",
+        "Hackathon_ASR/1_Ground_truth/Phoneme_Deleletion_ground_truth_FR.csv",
+        training=True
+    )
+    result.to_csv("Combining_block/combined_output.csv", index=False)
