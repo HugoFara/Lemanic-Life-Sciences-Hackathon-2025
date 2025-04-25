@@ -1,7 +1,7 @@
 """
 This is a text-to-IPA module.
 
-For now it works on French and is based on https://huggingface.co/Marxav/frpron
+For now, it works on French and is based on https://huggingface.co/Marxav/frpron
 
 It uses a GPT2 model, that may be quite old.
 """
