@@ -73,7 +73,7 @@ for lang in ["FR", "IT"]:
     combined_filenames.extend(df["file_name"])
     combined_langs.extend([lang] * len(df))
 
-print(f"\n✅ Total skipped audio files: {len(skipped_files)}")
+print(f"Total skipped audio files: {len(skipped_files)}")
 with open("skipped_audio_files.txt", "w") as f:
     f.writelines(f"{name}\n" for name in skipped_files)
 
