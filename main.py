@@ -82,12 +82,13 @@ def speech_recognition(wav_file, csv_file, model_type):
     whisper_result = f"{len(words)} words detected: {words}"
 
     #Run Wav2vec2
-    pho_path = "pho_output.csv"
+    pho_path = "output_FR.csv"
     #apply_pho() #TODO
     
     #Combine the outputs
     if model_type == 'Phoneme Deletion (french)':
-        phonem_test = first_phoneme_extraction(csv_file) #Create a CSV file with the first phoneme of each word --> also saved with can be changed
+        #phonem_test = first_phoneme_extraction(csv_file) #Create a CSV file with the first phoneme of each word --> also saved with can be changed
+        phonem_test = pd.read_csv("phonem_test.csv")
         combined_output = combine_decoding(pho_path, whisper_path, csv_file=csv_file, model=model_type, first_phonemes_csv=phonem_test)
     else: 
         combined_output = combine_decoding(pho_path, whisper_path, csv_file=csv_file, model=model_type)
