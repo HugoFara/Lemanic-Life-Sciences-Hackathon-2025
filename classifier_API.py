@@ -192,7 +192,7 @@ def model_train_FR(X, y, param_grid=None):
 
     return grid
 
-def get_predict(file_path, API_target_path='1_Ground_truth\\Phoneme_Deleletion_ground_truth_FR.csv', vocab_path='1_Ground_truth\\vocab.json', coder=1, deletion_path=None):
+def get_predict(file_path, API_target_path='Phoneme_Deleletion_ground_truth_FR.csv', vocab_path='vocab.json', coder=1, deletion_path=None):
 
     X, y = create_data(file_path, API_target_path, vocab_path, coder, deletion_path)
     model = model_train_FR(X, y)
