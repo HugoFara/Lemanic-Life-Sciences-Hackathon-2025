@@ -86,18 +86,18 @@ def speech_recognition(wav_file, csv_file, model_type):
     #apply_pho() #TODO
     
     #Combine the outputs
-
-    """if model_type == 'Phoneme Deletion (french)':
+    if model_type == 'Phoneme Deletion (french)':
         phonem_test = first_phoneme_extraction(csv_file) #Create a CSV file with the first phoneme of each word --> also saved with can be changed
-        combine_decoding(pho_path, whisper_path, csv_file=csv_file, model=model_type, first_phonemes_csv=phonem_test)
+        combined_output = combine_decoding(pho_path, whisper_path, csv_file=csv_file, model=model_type, first_phonemes_csv=phonem_test)
     else: 
-        combine_decoding(pho_path, whisper_path, csv_file=csv_file, model=model_type)
-"""
+        combined_output = combine_decoding(pho_path, whisper_path, csv_file=csv_file, model=model_type)
+    combined_output.to_csv("combined_output.csv", index=False)
+
     return whisper_result
 
 if __name__ == "__main__":
     wav_file = "C:/EPFL/Hackathon/2_Audiofiles/Phoneme_Deletion_FR_T1/3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_3eff2b8d9be54f24aaa5f0bf3ef81c50.wav"
-    csv_file = "C:\EPFL\Hackathon\interface_data.csv"
+    csv_file = "C:\EPFL\Hackathon\Lemanic-Life-Sciences-Hackathon-2025\interface_data_FR.csv"
     model_type = "Phoneme Deletion (french)"
     
     speech_recognition(wav_file, csv_file, model_type)
