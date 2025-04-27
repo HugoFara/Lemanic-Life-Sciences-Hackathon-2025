@@ -182,3 +182,6 @@ Hackathon_ASR/
 models/
 # Various model outputs
 outputs/
+
+Whisper/__pycache__/
+Combining_block/__pycache__/
