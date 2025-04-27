@@ -82,7 +82,7 @@ def speech_recognition(wav_file, csv_file, model_type):
     whisper_result = f"{len(words)} words detected: {words}"
 
     #Run Wav2vec2
-    pho_path = "pho_output.csv"
+    _pho_path = "pho_output.csv"
     #apply_pho() #TODO
     
     #Combine the outputs
