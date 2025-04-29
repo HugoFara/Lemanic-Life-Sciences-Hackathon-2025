@@ -7,8 +7,6 @@ It uses a GPT2 model, that may be quite old.
 """
 
 import re
-from phonemizer import phonemize
-
 import torch
 import transformers
 from phonemizer import phonemize

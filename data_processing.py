@@ -1,5 +1,4 @@
 import pandas as pd
-import re
 import ipa_encoder
 
 file_path_it = "Data/Ground_Truth/Decoding_ground_truth_IT.csv"

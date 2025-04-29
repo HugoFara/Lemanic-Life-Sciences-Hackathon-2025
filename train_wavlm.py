@@ -50,7 +50,7 @@ def get_each_layer(wav_input_16khz=None):
         wav_input_16khz = torch.nn.functional.layer_norm(
             wav_input_16khz, wav_input_16khz.shape
         )
-    rep, layer_results = model.extract_features(
+    _rep, layer_results = model.extract_features(
         wav_input_16khz,
         output_layer=model.cfg.encoder_layers,
         ret_layer_results=True

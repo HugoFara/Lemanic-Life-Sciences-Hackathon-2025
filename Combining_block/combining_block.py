@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import ast
 
 def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phonemes_csv=None, training=False):
@@ -45,11 +44,6 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
     #Merge the two dataframes
     merged_df = pd.merge(seperated_whisper_df, pho_output, on='file_name', how='inner')
 
-    """if model=="French":
-        experimental_data_df = pd.read_csv("ground_truth.csv", index_col="file_name")
-    else:
-        experimental_data_df = pd.read_csv("ground_truth.csv", index_col="file_name")"""
-    
     experimental_data_df = pd.read_csv(csv_file, index_col="file_name")
     
     result = []
@@ -63,7 +57,7 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
         index2 = 0 
         pho_row_result = []
         #Show API target
-        API_row = experimental_data_df.loc[file_name, "API_target"]
+        api_row = experimental_data_df.loc[file_name, "API_target"]
         
         for index, word in enumerate(words):
             list_of_pho = []
@@ -86,7 +80,7 @@ def combine_decoding(pho_path, whisper_path, csv_file, model=None, first_phoneme
             first_phonemes_df = pd.read_csv(first_phonemes_csv, index_col="file_name")
             result.append({'file_name': file_name, 'API_target': API_row, 'pho_proba': pho_row_result, 'first_phoneme': first_phonemes_df.loc[file_name, "first_pho"][0]})
         else:
-            result.append({'file_name': file_name, 'API_target': API_row, 'pho_proba': pho_row_result}) # We can fill it with a None column if necessary 
+            result.append({'file_name': file_name, 'API_target': api_row, 'pho_proba': pho_row_result}) # We can fill it with a None column if necessary 
 
         #Optional accuracy display
         if training:    

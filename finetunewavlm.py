@@ -56,9 +56,6 @@ class PhonemeRecognizer(nn.Module):
             # Forward pass to get log probabilities
             log_probs = self(inputs)
 
-            # Convert to CPU for decoding
-            log_probs_cpu = log_probs.cpu().detach().numpy()
-
             # Simple greedy decoding (for demonstration)
             # In a real system, you would use beam search with ctcdecode
             predictions = torch.argmax(log_probs, dim=-1).cpu().numpy()
