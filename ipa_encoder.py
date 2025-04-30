@@ -113,7 +113,11 @@ def get_ipa(words, language):
     # Phonemize only non-special tokens
     if language == "fr":
         language += "-fr"
-    phonemized = phonemizer.phonemize(normal_words, language=language, backend="espeak")
+    phonemized = phonemizer.phonemize(
+        normal_words, language=language, backend="espeak",
+        strip=True,
+        preserve_punctuation=True
+    )
     for i, word in enumerate(words):
         if word_indices[i] == 0:
             ipa_output.append("[PAD]")

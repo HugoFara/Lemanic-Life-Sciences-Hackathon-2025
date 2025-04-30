@@ -8,33 +8,41 @@ files_path = {
     "fr": "Hackathon_ASR/1_Ground_truth/Phoneme_Deleletion_ground_truth_FR.csv"
 }
 
-data = pd.read_csv(files_path[language])
+dataframe = pd.read_csv(files_path[language])
+new_dataframe = dataframe.copy()
+new_dataframe = new_dataframe.drop([
+    "participant_id", "phase", "language", "form", "config", "config_id", "API_target",
+    "accuracy_coder1", "notes_coder1", "accuracy_coder2", "notes_coder2"
+], axis=1)
 
 for coder in ["coder1", "coder2"]:
     print("Preparing data for", coder)
 
-    labeled_phonemes = data["trial_answer_" + coder]
+    labeled_phonemes = dataframe["trial_answer_" + coder]
 
     # Remove all symbols
     labeled_phonemes = (
         labeled_phonemes.str
-        .replace('.', ' ', regex=False)               # Replace dots with [PAD]
-        .replace(r'\{.*?\}', '[UNK]', regex=True)     # Replace {...} with [UNK]
-        .replace(r'\<.*?\>', '', regex=True)          # Remove <...>
+        # Replace space with a dot
+        .replace(r'[ \s ]+', '.', regex=True)
+        # Replace <...>, {...} with [UNK]
+        .replace(r'(\{.*?\}|\<.*?\>)', '?', regex=True)
     )
 
-    new_phonemes = []
-    for sentence in labeled_phonemes:
-        words = sentence.split()
-        ipa_words = ipa_encoder.get_ipa(words, language)
-        new_phonemes.append("[PAD]".join(ipa_words))
+    new_phonemes = ipa_encoder.get_ipa(
+        [str(sentence) for sentence in labeled_phonemes],
+        language
+    )
+    new_phonemes = [
+        sentence.strip().replace(".", "[PAD]").replace("?", "[UNK]")
+        for sentence in new_phonemes
+    ]
 
-    labeled_phonemes = pd.Series(new_phonemes)
+    new_dataframe[f"phonemes_{coder}"] = pd.Series(new_phonemes)
+    new_dataframe = new_dataframe.drop([f"trial_answer_{coder}"], axis=1)
 
-    new_data = data.copy()
-    new_data[f"trial_answer_phonemes"] = labeled_phonemes
-    output_path = f"outputs/phonemized_{language}_{coder}"
-    # new_data.to_csv(output_path, index=True)
+output_path = f"outputs/phonemized_{language}.csv"
+new_dataframe.to_csv(output_path, index=False)
 
 
 """
