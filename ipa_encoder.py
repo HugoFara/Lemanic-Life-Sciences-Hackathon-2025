@@ -86,47 +86,53 @@ def post_process(predictions, remove_special_characters=True):
     return output
 
 
-def get_ipa(words, language):
+def get_gpt_french_ipa(input_text, generator=None):
+    """
+    Return the IPA of a text, using a GPT2 model.
+
+    :param list[str] input_text: Text to use, non-word characters will be discarded.
+    :param generator: IPA generator to use.
+    :return list[str]: List where each word is converted to IPA.
+    """
+
+    sentences_list = preprocessor(input_text)
+    if generator is None:
+        generator = get_generator()
+    predictions = generator.predict(sentences_list)
+
+    return [post_process(prediction) for prediction in predictions]
+
+
+def get_ipa(sentences, language):
     """
     Convert a list of words to IPA using phonemizer.
-
-    It skips special tokens like [PAD], [UNK], etc.
 
     Check the phonemizer module description for a list of supported languages.
 
     :param list[str] words: List of words
     :return list[list[str]]: IPA-transcribed words or original token if special
     """
-    ipa_output = []
-    normal_words = []
-    word_indices = []
-
-    for i, word in enumerate(words):
-        if word == SPECIAL_TOKENS["pad"]:
-            word_indices.append(0)
-        elif word == SPECIAL_TOKENS["unk"]:
-            word_indices.append(1)
-        else:
-            normal_words.append(word)
-            word_indices.append(2)
-
     # Phonemize only non-special tokens
     if language == "fr":
         language += "-fr"
+        generator = get_generator()
     phonemized = phonemizer.phonemize(
-        normal_words, language=language, backend="espeak",
+        sentences,
+        language=language,
+        backend="espeak",
         strip=True,
         preserve_punctuation=True
     )
-    for i, word in enumerate(words):
-        if word_indices[i] == 0:
-            ipa_output.append("[PAD]")
-        elif word_indices[i] == 1:
-            ipa_output.append("[UNK]")
-        else:
-            ipa_output.append(phonemized.pop(0))
-
-    return ipa_output
+    # Robusting by post-processing English insertions
+    if language == "fr-fr":
+        failed = []
+        for i, sentence in enumerate(sentences):
+            if "(en)" in phonemized[i] or "(fr)" in phonemized[i]:
+                failed.append((i, sentence))
+        reprocessed = [get_gpt_french_ipa(fail[1].split("."), generator) for fail in failed]
+        for fail, new_phonemes in zip(failed, reprocessed):
+            phonemized[fail[0]] = ".".join([x[0] for x in new_phonemes])
+    return phonemized
 
 
 def get_french_ipa(words):
@@ -153,9 +159,9 @@ def get_italian_ipa(words):
 
 
 if __name__ == "__main__":
-    text = "Ceci est un texte français et accentué. Davoit, buccurelle. Plus de mots pour embrouiller le modèle"
+    text = "ceci est un texte français et accentué.2000 years. Davoit, buccurelle.Plus de mots pour embrouiller le modèle".replace(" ", ".")
     # text = "bonjour"
-    text = "Bongiorno a tutti le ragazzie"
+    # text = "Bongiorno a tutti le ragazzie"
 
-    print(get_ipa([text], "it"))
+    print(get_ipa([text], "fr"))
     # print(process_from_model([text]))

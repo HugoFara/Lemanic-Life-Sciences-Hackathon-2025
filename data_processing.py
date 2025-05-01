@@ -2,7 +2,8 @@ import pandas as pd
 import ipa_encoder
 
 
-def get_phonemes(dataframe):
+def get_phonemes(dataframe, language):
+    """Get the phonemes corresponding to the language."""
     new_dataframe = dataframe.copy()
     new_dataframe = new_dataframe.drop([
         "participant_id", "phase", "language", "form", "config", "config_id", "API_target",
@@ -59,7 +60,7 @@ if __name__ == "__main__":
     }
     dataframe = pd.read_csv(files_path[language])
 
-    new_dataframe = get_phonemes(dataframe)
+    new_dataframe = get_phonemes(dataframe, language)
     output_path = f"datasets/phonemized_{language}.csv"
     new_dataframe.to_csv(output_path, index=False)
     print(f"Data saved to {output_path}")
