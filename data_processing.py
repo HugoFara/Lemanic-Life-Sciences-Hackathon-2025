@@ -62,4 +62,5 @@ if __name__ == "__main__":
     new_dataframe = get_phonemes(dataframe)
     output_path = f"datasets/phonemized_{language}.csv"
     new_dataframe.to_csv(output_path, index=False)
+    print(f"Data saved to {output_path}")
 
