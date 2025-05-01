@@ -16,7 +16,7 @@ The proposed solution for this hackathon was:
 
 - The `Whisper` folder has information for Whisper, see [Whisper/README](./Whisper/README.md).
 - For the phoneme classification, everything is in `microsoft_wavlmbaseplus.ipynb`.
-  - As a bonus step, you may want to get phonemes from raw texts. This is where `data_processing` comes in. Behind the hood it uses `ipa_encoder.py`.
+  - As a bonus step, you may want to get phonemes from raw texts. This is where `ipa_encoder.py` comes in.
 - The combining block is in `Combining_block`.
 - The final classification comes from `SpeechClassifier.ipynb`.
 
