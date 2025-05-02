@@ -1,0 +1,12 @@
+tokenizer_path: custom_tokenizer
+output_dir: output/checkpoints
+log_dir: output/logs
+batch_size: 2
+epochs: 10
+learning_rate: 3e-5
+save_steps: 100
+csv_fr: outputs/phonemizer/phonemized_FR.csv
+csv_it: outputs/phonemizer/phonemized_IT.csv
+audio_fr: data/2_Audiofiles/Phoneme_Deletion_FR_T1
+audio_it: data/2_Audiofiles/Decoding_IT_T1
+pretrained_model: facebook/wav2vec2-xls-r-300m

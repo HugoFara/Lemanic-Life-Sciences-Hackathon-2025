@@ -20,7 +20,7 @@ def phonemize_text(
         padding_token (str): Token for padding."""
     df = pd.read_csv(csv_path)
     print(f"Preparing to phonemize {col} from {csv_path}.")
-    words_to_phonemize = df[["file_name", col]].head(10)
+    words_to_phonemize = df[["file_name", col]].head(1)
     new_col = col + "_phonemized"
     undefined_token_sep = undefined_token
     padding_token_sep = padding_token
@@ -73,12 +73,14 @@ if __name__ == "__main__":
         "trial_answer_coder2",
         "ita",
     )
-    phonemized_df_ita.to_csv("outputs/phonemizer/phonemized_IT.csv", index=False)
+    phonemized_df_ita.to_csv(saved_folder + "phonemized_IT.csv", index=False)
     phonemized_df_fr = phonemize_text(
         "data/1_Ground_truth/Phoneme_Deletion_ground_truth_FR.csv",
         "trial_answer_coder1",
         "fra",
     )
+    phonemized_df_fr.to_csv(saved_folder + "phonemized_FR.csv", index=False)
+
     all_phonemes = (
         phonemized_df_ita["trial_answer_coder2_phonemized"].dropna().tolist()
         + phonemized_df_fr["trial_answer_coder1_phonemized"].dropna().tolist()

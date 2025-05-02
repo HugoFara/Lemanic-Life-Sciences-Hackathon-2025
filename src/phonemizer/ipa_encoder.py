@@ -52,7 +52,7 @@ class Text2PhonemeConverter:
                 f"https://raw.githubusercontent.com/lingjzhu/CharsiuG2P/main/dicts/{language}.tsv"
             )
         # SETTING PHONEME LENGTH
-        config_path = Path("phoneme_lengths.json")
+        config_path = Path("configs/phoneme_lengths.json")
         with open(config_path, "r", encoding="utf-8") as f:
             self.phoneme_lengths = json.load(f)
         if os.path.exists(language_path):
