@@ -2,7 +2,7 @@
 
 Repository for code on the Lemanic Life Sciences Hackathon 2025 submission!
 
-> ![WARNING] Important
+> [!WARNING] Important:
 > The full repo is transitionning between notebooks, modules, pipeline definition and results exploitation. Things are extremely messy for now. It should get better soon though.
 
 ## Phonemizer Module
