@@ -1,10 +1,8 @@
 import os
-import re
 
-import numpy as np
 import pandas as pd
-from ipa_encoder import Text2PhonemeConverter, get_vocab_json
-from tqdm import tqdm
+import ipa_encoder
+import tqdm
 
 
 def phonemize_text(
@@ -12,15 +10,18 @@ def phonemize_text(
 ):
     """
     Phonemize the text in the specified column of a CSV file.
+
     Args:
         csv_path (str): Path to the CSV file.
         col (str): Column name to phonemize.
-        language (str): Language code for phonemization. Check https://docs.google.com/spreadsheets/d/1y7kisk-UZT9LxpQB0xMIF4CkxJt0iYJlWAnyj6azSBE/edit?gid=557940309#gid=557940309
+        language (str): Language code for phonemization. 
+        Check https://docs.google.com/spreadsheets/d/1y7kisk-UZT9LxpQB0xMIF4CkxJt0iYJlWAnyj6azSBE/edit?gid=557940309#gid=557940309
         undefined_token (str): Token for undefined words.
-        padding_token (str): Token for padding."""
+        padding_token (str): Token for padding.
+    """
     df = pd.read_csv(csv_path)
     print(f"Preparing to phonemize {col} from {csv_path}.")
-    words_to_phonemize = df[["file_name", col]].head(10)
+    words_to_phonemize = df[["file_name", col]].head(20)
     new_col = col + "_phonemized"
     undefined_token_sep = undefined_token
     padding_token_sep = padding_token
@@ -42,18 +43,21 @@ def phonemize_text(
         # Handle string boundaries:
         .str.replace(
             rf"^{padding_token}", padding_token + " ", regex=True
-        )  # Start of string
+        )
+        # Start of string
         .str.replace(
             rf"{padding_token}$", " " + padding_token, regex=True
-        )  # End of string
+        )
+        # End of string
         .str.replace(rf"^{undefined_token}", undefined_token + " ", regex=True)
         .str.replace(rf"{undefined_token}$", " " + undefined_token, regex=True)
     )
     words_to_phonemize[new_col] = words_to_phonemize[new_col].fillna(undefined_token)
-    text_to_phoneme = Text2PhonemeConverter(
+    text_to_phoneme = ipa_encoder.Text2PhonemeConverter(
         language=language, words_to_exclude=[undefined_token]
     )
-    tqdm.pandas()  # Enable pandas integration
+    # Enable pandas integration
+    tqdm.tqdm.pandas()
 
     # Add progress bar to your apply()
     words_to_phonemize[new_col] = words_to_phonemize[new_col].progress_apply(
@@ -80,8 +84,9 @@ if __name__ == "__main__":
         "trial_answer_coder1",
         "fra",
     )
+    phonemized_df_fr.to_csv("outputs/phonemizer/phonemized_FR.csv", index=False)
     all_phonemes = (
         phonemized_df_ita["trial_answer_coder2_phonemized"].dropna().tolist()
         + phonemized_df_fr["trial_answer_coder1_phonemized"].dropna().tolist()
     )
-    get_vocab_json(all_phonemes, "custom_tokenizer")
+    ipa_encoder.get_vocab_json(all_phonemes, "custom_tokenizer")

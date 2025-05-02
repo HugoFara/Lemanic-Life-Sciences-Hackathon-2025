@@ -55,8 +55,8 @@ class Text2PhonemeConverter:
                 f"https://raw.githubusercontent.com/lingjzhu/CharsiuG2P/main/dicts/{language}.tsv"
             )
         # SETTING PHONEME LENGTH
-        if os.path.exists("phoneme_lengths.json"):
-            config_path = Path("phoneme_lengths.json")
+        config_path = "configs/phoneme_lengths.json"
+        if os.path.exists(config_path):
             with open(config_path, "r", encoding="utf-8") as f:
                 self.phoneme_lengths = json.load(f)
         else:
@@ -84,7 +84,7 @@ class Text2PhonemeConverter:
             words (str): Input text to be converted.
             padding_token (str): Token used for padding."""
         # First normalize the spacing around special tokens
-        words = re.sub(r"(?<!\s)(\[UNK\]|\[PAD\])(?!\s)", r" \1 ", words)
+        words = re.sub(r"(?<!\s)\[(UNK|PAD)\](?!\s)", r" \1 ", words)
         words = re.sub(r" +", " ", words).strip()  # Collapse multiple spaces
 
         list_words = words.split(" ")
@@ -117,13 +117,9 @@ class Text2PhonemeConverter:
                 )
                 list_phones.append(phones[0])
         for i in range(len(list_phones)):
-            if list_phones[i] in self.exclude_token:
-                continue  # skip excluded tokens of segmentation
-            else:
-                try:
-                    segmented_phone = self.segment_tool(list_phones[i], ipa=True)
-                except:
-                    segmented_phone = self.segment_tool(list_phones[i])
+            # skip excluded tokens of segmentation
+            if list_phones[i] not in self.exclude_token:
+                segmented_phone = self.segment_tool(list_phones[i], ipa=True)
                 list_phones[i] = segmented_phone
         # fill gaps with padding token
         return padding_token.join(list_phones)
@@ -138,8 +134,8 @@ def extract_unique_phonemes(phoneme_str):
 
 
 def get_vocab_json(all_phonemes, output_path):
-    phonoemes = "".join(all_phonemes)
-    unique_phonemes_fr = extract_unique_phonemes(phonoemes)
+    phonemes = "".join(all_phonemes)
+    unique_phonemes_fr = extract_unique_phonemes(phonemes)
     unique_phonemes_dict_fr = {ph: i for i, ph in enumerate(unique_phonemes_fr)}
     # Save the unique phonemes to a JSON file
     os.makedirs(output_path, exist_ok=True)
