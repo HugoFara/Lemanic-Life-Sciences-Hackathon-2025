@@ -20,7 +20,7 @@ def phonemize_text(
     """
     df = pd.read_csv(csv_path)
     print(f"Preparing to phonemize {col} from {csv_path}.")
-    words_to_phonemize = df[["file_name", col]].head(20)
+    words_to_phonemize = df[["file_name", col]].head(10)
     new_col = col + "_phonemized"
     undefined_token_sep = undefined_token
     padding_token_sep = padding_token

@@ -23,7 +23,7 @@ class Text2PhonemeConverter:
         words_to_exclude=None,
         tokenizer="google/byt5-small",
         language="fra",
-        is_cuda=True,
+        cuda=True,
         folder_language="lang_dict",
     ):
         """
@@ -32,19 +32,21 @@ class Text2PhonemeConverter:
         :param list words_to_exclude: List of words to exclude from phonemization.
         :param str tokenizer: Pre-trained tokenizer model name.
         :param str language: Language code for phonemization. Two letters only (e.g.: "fr")
-        :param bool is_cuda: Flag to use CUDA for GPU acceleration.
+        :param bool cuda: Flag to use CUDA for GPU acceleration.
         :param str folder_language: Folder path to save language dictionaries.
         """
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(tokenizer)
         self.model = transformers.T5ForConditionalGeneration.from_pretrained(
             "charsiu/g2p_multilingual_byT5_small_100"
         )
-        self.is_cuda = is_cuda
-        if self.is_cuda:
+        device = "cpu"
+        if cuda:
             if torch.cuda.is_available():
-                self.model = self.model.to("cuda")
+                device = "cuda:0"
             else:
                 warnings.warn("CUDA is not available but was requested")
+        self.device = torch.device(device)
+        self.model = self.model.to(self.device)
         if words_to_exclude is None:
             words_to_exclude = ["[UNK]"]
         self.exclude_token = words_to_exclude
@@ -118,9 +120,8 @@ class Text2PhonemeConverter:
                 add_special_tokens=False,
                 return_tensors="pt",
             )
-            if self.is_cuda:
-                out["input_ids"] = out["input_ids"].cuda()
-                out["attention_mask"] = out["attention_mask"].cuda()
+            out["input_ids"] = out["input_ids"].to(self.device)
+            out["attention_mask"] = out["attention_mask"].to(self.device)
             preds = self.model.generate(
                 **out,
                 num_beams=1,
