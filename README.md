@@ -2,6 +2,9 @@
 
 Repository for code on the Lemanic Life Sciences Hackathon 2025 submission!
 
+> ![WARNING] Important
+> The full repo is transitionning between notebooks, modules, pipeline definition and results exploitation. Things are extremely messy for now. It should get better soon though.
+
 ## Phonemizer Module
 
 This folder `src/phonemizer` contains tools for phonemizing text data into phoneme sequences using a multilingual grapheme-to-phoneme (G2P) model and IPA segmentation.
