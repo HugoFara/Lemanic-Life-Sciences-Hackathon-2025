@@ -176,10 +176,18 @@ cython_debug/
 # Specific stuff for our repository
 Hackathon_ASR/
 data/
+# Store intermediate dataset
 datasets/
+# Store model checkpoints
 models/
 .python-version
 uv.lock
 Data
+# Various model outputs
 outputs/
 lang_dict/
+
+WavLM-Base+.pt
+
+Whisper/__pycache__/
+Combining_block/__pycache__/
