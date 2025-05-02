@@ -66,16 +66,17 @@ def phonemize_text(
 
 
 if __name__ == "__main__":
+    data_folder = "Hackathon_ASR"
     saved_folder = "outputs/phonemizer/"
     os.makedirs(saved_folder, exist_ok=True)
     phonemized_df_ita = phonemize_text(
-        "data/1_Ground_truth/Decoding_ground_truth_IT.csv",
+        f"{data_folder}/1_Ground_truth/Decoding_ground_truth_IT.csv",
         "trial_answer_coder2",
         "ita",
     )
     phonemized_df_ita.to_csv("outputs/phonemizer/phonemized_IT.csv", index=False)
     phonemized_df_fr = phonemize_text(
-        "data/1_Ground_truth/Phoneme_Deletion_ground_truth_FR.csv",
+        f"{data_folder}/1_Ground_truth/Phoneme_Deleletion_ground_truth_FR.csv",
         "trial_answer_coder1",
         "fra",
     )

@@ -9,6 +9,7 @@ import json
 import os
 import re
 from pathlib import Path
+import warnings
 
 from segments import Tokenizer
 from transformers import AutoTokenizer, T5ForConditionalGeneration
@@ -17,7 +18,7 @@ from transformers import AutoTokenizer, T5ForConditionalGeneration
 class Text2PhonemeConverter:
     def __init__(
         self,
-        words_to_exclude=["[UNK]"],
+        words_to_exclude=None,
         tokenizer="google/byt5-small",
         language="fra",
         is_cuda=True,
@@ -38,6 +39,8 @@ class Text2PhonemeConverter:
         self.is_cuda = is_cuda
         if self.is_cuda:
             self.model = self.model.cuda()
+        if words_to_exclude is None:
+            words_to_exclude = ["[UNK]"]
         self.exclude_token = words_to_exclude
         self.segment_tool = Tokenizer()
         self.language = language
@@ -52,9 +55,16 @@ class Text2PhonemeConverter:
                 f"https://raw.githubusercontent.com/lingjzhu/CharsiuG2P/main/dicts/{language}.tsv"
             )
         # SETTING PHONEME LENGTH
-        config_path = Path("phoneme_lengths.json")
-        with open(config_path, "r", encoding="utf-8") as f:
-            self.phoneme_lengths = json.load(f)
+        if os.path.exists("phoneme_lengths.json"):
+            config_path = Path("phoneme_lengths.json")
+            with open(config_path, "r", encoding="utf-8") as f:
+                self.phoneme_lengths = json.load(f)
+        else:
+            warnings.warn("Loading dummy values for phonemes lengths!")
+            self.phoneme_lengths = {
+                "fra.tsv": 50,
+                "ita.tsv": 50
+            }
         if os.path.exists(language_path):
             f = open(language_path, "r", encoding="utf-8")
             list_words = f.read().strip().split("\n")
