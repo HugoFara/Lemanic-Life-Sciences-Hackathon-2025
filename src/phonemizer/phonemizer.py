@@ -71,13 +71,14 @@ if __name__ == "__main__":
         "trial_answer_coder2",
         "it",
     )
-    phonemized_df_ita.to_csv("outputs/phonemizer/phonemized_IT.csv", index=False)
+    phonemized_df_ita.to_csv(saved_folder + "phonemized_IT.csv", index=False)
     phonemized_df_fr = phonemize_text(
         f"{data_folder}/1_Ground_truth/Phoneme_Deleletion_ground_truth_FR.csv",
         "trial_answer_coder1",
         "fr",
     )
-    phonemized_df_fr.to_csv("outputs/phonemizer/phonemized_FR.csv", index=False)
+    phonemized_df_fr.to_csv(saved_folder + "phonemized_FR.csv", index=False)
+
     all_phonemes = (
         phonemized_df_ita["trial_answer_coder2_phonemized"].dropna().tolist()
         + phonemized_df_fr["trial_answer_coder1_phonemized"].dropna().tolist()
