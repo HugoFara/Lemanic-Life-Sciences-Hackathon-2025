@@ -4,15 +4,15 @@ Original wrapper by Lingjuan Zhu (@lingjzhu):
 https://github.com/lingjzhu/text2phonemesequence
 
 """
-
+import csv
 import json
 import os
+import subprocess
 import re
-from pathlib import Path
 import warnings
 
-from segments import Tokenizer
-from transformers import AutoTokenizer, T5ForConditionalGeneration
+import segments
+import transformers
 
 
 class Text2PhonemeConverter:
@@ -25,15 +25,16 @@ class Text2PhonemeConverter:
         folder_language="lang_dict",
     ):
         """
-        Args:
-            words_to_exclude (list): List of words to exclude from phonemization.
-            tokenizer (str): Pre-trained tokenizer model name.
-            language (str): Language code for phonemization.
-            is_cuda (bool): Flag to use CUDA for GPU acceleration.
-            folder_language (str): Folder path to save language dictionaries.
+        Load the rules to convert from a language to the corresponding phonemes.
+
+        :param list words_to_exclude: List of words to exclude from phonemization.
+        :param str tokenizer: Pre-trained tokenizer model name.
+        :param str language: Language code for phonemization. Two letters only (e.g.: "fr")
+        :param bool is_cuda: Flag to use CUDA for GPU acceleration.
+        :param str folder_language: Folder path to save language dictionaries.
         """
-        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer)
-        self.model = T5ForConditionalGeneration.from_pretrained(
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(tokenizer)
+        self.model = transformers.T5ForConditionalGeneration.from_pretrained(
             "charsiu/g2p_multilingual_byT5_small_100"
         )
         self.is_cuda = is_cuda
@@ -42,17 +43,24 @@ class Text2PhonemeConverter:
         if words_to_exclude is None:
             words_to_exclude = ["[UNK]"]
         self.exclude_token = words_to_exclude
-        self.segment_tool = Tokenizer()
-        self.language = language
+        self.segment_tool = segments.Tokenizer()
+        self.language = {
+            "fr": "fra",
+            "it": "ita"
+        }[language]
         self.phone_dict = {}
         ## Download language dictionary if not exists
         os.makedirs(folder_language, exist_ok=True)
-        language_path = os.path.join(folder_language, language + ".tsv")
-        print(language_path)
+        language_path = os.path.join(folder_language, self.language + ".tsv")
         if not os.path.exists(language_path):
-            os.system(
-                f"wget -O {language_path} "  # -O specifies output path
-                f"https://raw.githubusercontent.com/lingjzhu/CharsiuG2P/main/dicts/{language}.tsv"
+            subprocess.run(
+                [
+                    "wget",
+                    "-O", 
+                    language_path,
+                    f"https://raw.githubusercontent.com/lingjzhu/CharsiuG2P/main/dicts/{self.language}.tsv"
+                ],
+                check=True
             )
         # SETTING PHONEME LENGTH
         config_path = "configs/phoneme_lengths.json"
@@ -66,61 +74,64 @@ class Text2PhonemeConverter:
                 "ita.tsv": 50
             }
         if os.path.exists(language_path):
-            f = open(language_path, "r", encoding="utf-8")
-            list_words = f.read().strip().split("\n")
-            f.close()
-            for word_phone in list_words:
-                w_p = word_phone.split("\t")
-                assert len(w_p) == 2
-                if "," not in w_p[1]:
-                    self.phone_dict[w_p[0]] = [w_p[1]]
-                else:
-                    self.phone_dict[w_p[0]] = [w_p[1].split(",")[0]]
+            with open(language_path, "r", encoding="utf-8") as file:
+                tsv_file = csv.reader(file, delimiter="\t")
+                # printing data line by line
+                for word_phonemes in tsv_file:
+                    assert len(word_phonemes) == 2
+                    self.phone_dict[word_phonemes[0]] = [word_phonemes[1].split(",")[0]]
+                    
 
-    def phonemize(self, words="", padding_token="[PAD]"):
+    def phonemize(self, words, padding_token="[PAD]"):
         """
         Convert text to phonemes using the T5 model.
-        Args:
-            words (str): Input text to be converted.
-            padding_token (str): Token used for padding."""
-        # First normalize the spacing around special tokens
-        words = re.sub(r"(?<!\s)\[(UNK|PAD)\](?!\s)", r" \1 ", words)
-        words = re.sub(r" +", " ", words).strip()  # Collapse multiple spaces
-
-        list_words = words.split(" ")
+        
+        :param list[str] words: Input text to be converted.
+        :param str padding_token: Token used for padding.
+        """
         list_phones = []
+        new_words = []
         self.exclude_token.append(padding_token)
-        for i in range(len(list_words)):
-            if list_words[i] in self.phone_dict:
-                list_phones.append(self.phone_dict[list_words[i]][0])
-            elif list_words[i] in self.exclude_token:
-                list_phones.append(list_words[i])
+        for i, word in enumerate(words):
+            # First normalize the spacing around special tokens
+            word = re.sub(r"(?<!\s)\[(UNK|PAD)\](?!\s)", r" \1 ", word)
+            # Then collapse multiple spaces
+            word = re.sub(r" +", " ", word).strip() 
+            if word in self.phone_dict:
+                list_phones.append(self.phone_dict[word][0])
+            elif word in self.exclude_token:
+                list_phones.append(word)
             else:
-                out = self.tokenizer(
-                    "<" + self.language + ">: " + list_words[i],
-                    padding=True,
-                    add_special_tokens=False,
-                    return_tensors="pt",
-                )
-                if self.is_cuda:
-                    out["input_ids"] = out["input_ids"].cuda()
-                    out["attention_mask"] = out["attention_mask"].cuda()
-                if self.language + ".tsv" not in self.phoneme_lengths.keys():
-                    self.phoneme_lengths[self.language + ".tsv"] = 50
-                preds = self.model.generate(
-                    **out,
-                    num_beams=1,
-                    max_length=self.phoneme_lengths[self.language + ".tsv"],
-                )
-                phones = self.tokenizer.batch_decode(
-                    preds.tolist(), skip_special_tokens=True
-                )
-                list_phones.append(phones[0])
-        for i in range(len(list_phones)):
+                new_words.append((i, word))
+                list_phones.append("")
+
+        # Then batch the unkown words
+        if new_words:
+            out = self.tokenizer(
+                [f"<{self.language}>: {word[1]}" for word in new_words],
+                padding=True,
+                add_special_tokens=False,
+                return_tensors="pt",
+            )
+            if self.is_cuda:
+                out["input_ids"] = out["input_ids"].cuda()
+                out["attention_mask"] = out["attention_mask"].cuda()
+            preds = self.model.generate(
+                **out,
+                num_beams=1,
+                max_length=self.phoneme_lengths[self.language + ".tsv"],
+            )
+            phones = self.tokenizer.batch_decode(
+                preds.tolist(), skip_special_tokens=True
+            )
+            for i, phonemized in enumerate(phones):
+                list_phones[new_words[i][0]] = phonemized
+
+        for i, phoneme in enumerate(list_phones):
             # skip excluded tokens of segmentation
-            if list_phones[i] not in self.exclude_token:
-                segmented_phone = self.segment_tool(list_phones[i], ipa=True)
-                list_phones[i] = segmented_phone
+            if phoneme not in self.exclude_token:
+                list_phones[i] = self.segment_tool(phoneme, ipa=True)
+
         # fill gaps with padding token
         return padding_token.join(list_phones)
 

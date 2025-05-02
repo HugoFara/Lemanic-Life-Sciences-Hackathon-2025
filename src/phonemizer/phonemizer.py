@@ -11,13 +11,12 @@ def phonemize_text(
     """
     Phonemize the text in the specified column of a CSV file.
 
-    Args:
-        csv_path (str): Path to the CSV file.
-        col (str): Column name to phonemize.
-        language (str): Language code for phonemization. 
-        Check https://docs.google.com/spreadsheets/d/1y7kisk-UZT9LxpQB0xMIF4CkxJt0iYJlWAnyj6azSBE/edit?gid=557940309#gid=557940309
-        undefined_token (str): Token for undefined words.
-        padding_token (str): Token for padding.
+    :param str csv_path: Path to the CSV file.
+    :param str col: Column name to phonemize.
+    :apram str language: Language code for phonemization. Two letters.
+    Check https://docs.google.com/spreadsheets/d/1y7kisk-UZT9LxpQB0xMIF4CkxJt0iYJlWAnyj6azSBE/edit?gid=557940309#gid=557940309
+    :param str undefined_token: Token for undefined words.
+    :apram str padding_token: Token for padding.
     """
     df = pd.read_csv(csv_path)
     print(f"Preparing to phonemize {col} from {csv_path}.")
@@ -33,13 +32,7 @@ def phonemize_text(
         words_to_phonemize[col]
         .str.replace(".", padding_token_sep, regex=False)
         # Modified regex to handle [UNK] properly:
-        .str.replace(
-            r"(?<!\s)(\[UNK\])(?!\s)", r" \1 ", regex=True
-        )  # Add spaces around [UNK] if not already there
-        .str.replace(r"\{.*?\}", undefined_token_sep, regex=True)
-        .str.replace(r"\<.*?\>", undefined_token_sep, regex=True)
-        .str.replace(r"\[.*?\]", undefined_token_sep, regex=True)
-        .str.replace(r"\(.*?\)", undefined_token_sep, regex=True)
+        .str.replace(r"\{.*?\}|\<.*?\>|\[.*?\]|\(.*?\)", undefined_token_sep, regex=True)
         # Handle string boundaries:
         .str.replace(
             rf"^{padding_token}", padding_token + " ", regex=True
@@ -61,7 +54,7 @@ def phonemize_text(
 
     # Add progress bar to your apply()
     words_to_phonemize[new_col] = words_to_phonemize[new_col].progress_apply(
-        lambda x: text_to_phoneme.phonemize(x, padding_token=padding_token)
+        lambda x: text_to_phoneme.phonemize(x.split(" "), padding_token=padding_token)
     )
     phonemized_df = pd.merge(
         df, words_to_phonemize[["file_name", new_col]], on="file_name", how="left"
@@ -76,13 +69,13 @@ if __name__ == "__main__":
     phonemized_df_ita = phonemize_text(
         f"{data_folder}/1_Ground_truth/Decoding_ground_truth_IT.csv",
         "trial_answer_coder2",
-        "ita",
+        "it",
     )
     phonemized_df_ita.to_csv("outputs/phonemizer/phonemized_IT.csv", index=False)
     phonemized_df_fr = phonemize_text(
         f"{data_folder}/1_Ground_truth/Phoneme_Deleletion_ground_truth_FR.csv",
         "trial_answer_coder1",
-        "fra",
+        "fr",
     )
     phonemized_df_fr.to_csv("outputs/phonemizer/phonemized_FR.csv", index=False)
     all_phonemes = (
