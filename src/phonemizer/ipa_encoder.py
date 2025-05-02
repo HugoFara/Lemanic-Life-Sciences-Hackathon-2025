@@ -11,6 +11,8 @@ import subprocess
 import re
 import warnings
 
+import torch
+
 import segments
 import transformers
 
@@ -39,7 +41,10 @@ class Text2PhonemeConverter:
         )
         self.is_cuda = is_cuda
         if self.is_cuda:
-            self.model = self.model.cuda()
+            if torch.cuda.is_available():
+                self.model = self.model.to("cuda")
+            else:
+                warnings.warn("CUDA is not available but was requested")
         if words_to_exclude is None:
             words_to_exclude = ["[UNK]"]
         self.exclude_token = words_to_exclude

@@ -16,6 +16,7 @@ import transformers
 
 import phonemizer
 
+PHONEMIZER_MODEL = "Marxav/frpron"
 SPECIAL_TOKENS = {"pad": "[PAD]", "unk": "[UNK]"}
 
 def preprocessor(sentences):
@@ -49,8 +50,8 @@ def process_from_model(sentences):
     :param list[str] sentences: Input sentences to process
     :return list[str]: Processed element
     """
-    tokenizer = transformers.AutoTokenizer.from_pretrained("Marxav/frpron")
-    model = transformers.AutoModelForCausalLM.from_pretrained("Marxav/frpron")
+    tokenizer = transformers.AutoTokenizer.from_pretrained(PHONEMIZER_MODEL)
+    model = transformers.AutoModelForCausalLM.from_pretrained(PHONEMIZER_MODEL)
 
     clean_sentences = preprocessor(sentences)
     output = [[""] * len(clean_sentence) for clean_sentence in clean_sentences]
@@ -68,7 +69,7 @@ def process_from_model(sentences):
 
 
 def get_generator():
-    return transformers.pipeline("text-generation", model="Marxav/frpron")
+    return transformers.pipeline("text-generation", model=PHONEMIZER_MODEL)
 
 
 def post_process(predictions, remove_special_characters=True):
