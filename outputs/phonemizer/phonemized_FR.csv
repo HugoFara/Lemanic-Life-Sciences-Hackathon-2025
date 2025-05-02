@@ -1,10 +1,10 @@
 file_name,participant_id,phase,language,form,config_id,config,API_target,trial_answer_coder1,accuracy_coder1,notes_coder1,trial_answer_coder2,accuracy_coder2,notes_coder2,trial_answer_coder1_phonemized
-3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_2249c5f2f75d4b089bee1f36e1a7aef2.wav,3101,DELETION,fr,B,phondel_B_pseudo_8,bromal,[ʁɔmal],an.nage,0.0,,omnage,0.0,,a n y ɛ n k n a ʒ
-3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_3eff2b8d9be54f24aaa5f0bf3ef81c50.wav,3101,DELETION,fr,B,phondel_B_pseudo_6,banéon,[aneɔ̃],{only_environment},,,{only_environment},,,œ̃ k
+3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_2249c5f2f75d4b089bee1f36e1a7aef2.wav,3101,DELETION,fr,B,phondel_B_pseudo_8,bromal,[ʁɔmal],an.nage,0.0,,omnage,0.0,,a n t œ n k n a d ʒ
+3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_3eff2b8d9be54f24aaa5f0bf3ef81c50.wav,3101,DELETION,fr,B,phondel_B_pseudo_6,banéon,[aneɔ̃],{only_environment},,,{only_environment},,,[UNK]
 3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_56dbefb3163a44beab895890b503600f.wav,3101,DELETION,fr,B,phondel_B_word_2,cheval,[əval],ch euval,1.0,first_phoneme_repetition,ch {pause} euval,1.0,first_phoneme_repetition,t ʃ i[PAD]œ v a l
 3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_5c6cef80aa54470caa4df67c9003aecc.wav,3101,DELETION,fr,B,phondel_B_pseudo_7,polage,[ɔlaʒ],onage,1.0,,{cut recording},,cut_recording,ɔ n a ʒ
 3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_620b6b5984f14b0c90432d5a123e2106.wav,3101,DELETION,fr,B,phondel_B_word_3,fromage,[ʁɔmaʒ],omage,1.0,,omage,1.0,,ɔ m a ʒ
-3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_62fc4932a42d48069359d1440834e5bd.wav,3101,DELETION,fr,B,phondel_B_pseudo_1,mican,[ikã],{only_environment},,,{only_environment},,,œ̃ k
+3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_62fc4932a42d48069359d1440834e5bd.wav,3101,DELETION,fr,B,phondel_B_pseudo_1,mican,[ikã],{only_environment},,,{only_environment},,,[UNK]
 3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_6a766174281f410680ecd058a69e4b98.wav,3101,DELETION,fr,B,phondel_B_word_8,capitale,[apital],apitale,1.0,,apitale,1.0,,a p i t a l
 3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_72b5a272edaf4d49828bc07b99d89501.wav,3101,DELETION,fr,B,phondel_B_word_0,plage,[laʒ],lage,1.0,,lage,1.0,,l a ʒ
 3101_edugame2023_1c148def3c254026adc7a7fdc3edc6f6_74e63a09d5164d319591e5ff1c9813aa.wav,3101,DELETION,fr,B,phondel_B_pseudo_4,plabir,[labiʁ],plabir la abir,1.0,sounding_out,p labir avir,1.0,first_phoneme_repetition wrong_self_correction,p l a b i ʁ[PAD]l a[PAD]a b i ʁ

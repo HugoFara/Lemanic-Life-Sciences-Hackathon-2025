@@ -96,23 +96,22 @@ class Text2PhonemeConverter:
         :param list[str] words: Input text to be converted.
         :param str padding_token: Token used for padding.
         """
-        list_phones = []
+        phonemes_list = [""] * len(words)
         new_words = []
         self.exclude_token.append(padding_token)
         for i, word in enumerate(words):
             # First normalize the spacing around special tokens
-            word = re.sub(r"(?<!\s)\[(UNK|PAD)\](?!\s)", r" \1 ", word)
+            word = re.sub(r"(?<!\s)\[(UNK|PAD)\](?!\s)", r" [\1] ", word)
             # Then collapse multiple spaces
-            word = re.sub(r" +", " ", word).strip() 
+            word = re.sub(r" +", " ", word).strip()
             if word in self.phone_dict:
-                list_phones.append(self.phone_dict[word][0])
+                phonemes_list[i] = self.phone_dict[word][0]
             elif word in self.exclude_token:
-                list_phones.append(word)
+                phonemes_list[i] = word
             else:
                 new_words.append((i, word))
-                list_phones.append("")
 
-        # Then batch the unkown words
+        # Then batch the unknown words
         if new_words:
             out = self.tokenizer(
                 [f"<{self.language}>: {word[1]}" for word in new_words],
@@ -122,24 +121,24 @@ class Text2PhonemeConverter:
             )
             out["input_ids"] = out["input_ids"].to(self.device)
             out["attention_mask"] = out["attention_mask"].to(self.device)
-            preds = self.model.generate(
+            predictions = self.model.generate(
                 **out,
                 num_beams=1,
                 max_length=self.phoneme_lengths[self.language + ".tsv"],
             )
-            phones = self.tokenizer.batch_decode(
-                preds.tolist(), skip_special_tokens=True
+            phonemes = self.tokenizer.batch_decode(
+                predictions.tolist(), skip_special_tokens=True
             )
-            for i, phonemized in enumerate(phones):
-                list_phones[new_words[i][0]] = phonemized
+            for i, phonemized in enumerate(phonemes):
+                phonemes_list[new_words[i][0]] = phonemized
 
-        for i, phoneme in enumerate(list_phones):
+        for i, phoneme in enumerate(phonemes_list):
             # skip excluded tokens of segmentation
             if phoneme not in self.exclude_token:
-                list_phones[i] = self.segment_tool(phoneme, ipa=True)
+                phonemes_list[i] = self.segment_tool(phoneme, ipa=True)
 
         # fill gaps with padding token
-        return padding_token.join(list_phones)
+        return padding_token.join(phonemes_list)
 
 
 def extract_unique_phonemes(phoneme_str):
@@ -152,10 +151,10 @@ def extract_unique_phonemes(phoneme_str):
 
 def get_vocab_json(all_phonemes, output_path):
     phonemes = "".join(all_phonemes)
-    unique_phonemes_fr = extract_unique_phonemes(phonemes)
-    unique_phonemes_dict_fr = {ph: i for i, ph in enumerate(unique_phonemes_fr)}
+    unique_phonemes = extract_unique_phonemes(phonemes)
+    unique_phonemes_dict = {ph: i for i, ph in enumerate(unique_phonemes)}
     # Save the unique phonemes to a JSON file
     os.makedirs(output_path, exist_ok=True)
     final_path = os.path.join(output_path, "vocab.json")
-    with open(final_path, "w", encoding="utf-8") as f:
-        json.dump(unique_phonemes_dict_fr, f, ensure_ascii=False, indent=2)
+    with open(final_path, "w", encoding="utf-8") as file:
+        json.dump(unique_phonemes_dict, file, ensure_ascii=False, indent=2)
