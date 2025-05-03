@@ -58,11 +58,18 @@ def phonemize_text(
     for out_col in new_cols:
         # Add progress bar to your apply()
         words_to_phonemize[out_col] = words_to_phonemize[out_col].progress_apply(
-            lambda x: text_to_phoneme.phonemize(x.split(" "), padding_token=padding_token)
+            lambda x: text_to_phoneme.phonemize(
+                x.split(" "),
+                padding_token=" " + padding_token + " "
+            )
         )
 
     phonemized_df = pd.merge(
-        df, words_to_phonemize[["file_name"] + new_cols], on="file_name", how="left"
+        df,
+        words_to_phonemize[["file_name"] + new_cols],
+        on="file_name",
+        how="left",
+        validate="one_to_one"
     )
     return phonemized_df
 

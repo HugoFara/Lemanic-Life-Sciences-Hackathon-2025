@@ -7,13 +7,12 @@ https://github.com/lingjzhu/text2phonemesequence
 import csv
 import json
 import os
-import subprocess
 import re
+import subprocess
 import warnings
 
-import torch
-
 import segments
+import torch
 import transformers
 
 
@@ -89,7 +88,7 @@ class Text2PhonemeConverter:
                     self.phone_dict[word_phonemes[0]] = [word_phonemes[1].split(",")[0]]
                     
 
-    def phonemize(self, words, padding_token="[PAD]"):
+    def phonemize(self, words, padding_token=" [PAD] "):
         """
         Convert text to phonemes using the T5 model.
         
@@ -142,19 +141,23 @@ class Text2PhonemeConverter:
 
 
 def extract_unique_phonemes(phoneme_str):
+    """Get the phonemes from a string."""
     pattern = r"\[PAD\]|\[UNK\]|."
     phonemes = re.findall(pattern, phoneme_str)
     # remove ' ' should not be in the list
-    phonemes = [ph for ph in phonemes if ph != " "]
-    return list(dict.fromkeys(phonemes))
+    uniques = set([ph for ph in phonemes if ph != " "])
+    return list(uniques)
 
 
 def get_vocab_json(all_phonemes, output_path):
-    phonemes = "".join(all_phonemes)
-    unique_phonemes = extract_unique_phonemes(phonemes)
+    """Save the vocab to a JSON file."""
+    phonemes = " ".join(all_phonemes)
+    unique_phonemes = {"[PAD]", "[UNK]"}
+    unique_phonemes.update(phonemes.split(" "))
     unique_phonemes_dict = {ph: i for i, ph in enumerate(unique_phonemes)}
     # Save the unique phonemes to a JSON file
     os.makedirs(output_path, exist_ok=True)
     final_path = os.path.join(output_path, "vocab.json")
     with open(final_path, "w", encoding="utf-8") as file:
         json.dump(unique_phonemes_dict, file, ensure_ascii=False, indent=2)
+    print(f"Vocabulary saved as {final_path}")
