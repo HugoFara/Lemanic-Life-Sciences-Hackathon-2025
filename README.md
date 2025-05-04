@@ -14,9 +14,9 @@ The proposed solution for this hackathon was:
 3. Combine both information using times. Retrieve phonemes for each word.
 4. Classify a word as correct or incorrect based on phonemes.
 
-## Important files
+## Structure
 
-- The `whisper` folder has information for Whisper, see [whisper/README](./Whisper/README.md).
+- The `word_segmenter` does word level segementation with Whisper. See [whisper/README](./Whisper/README.md).
 - For the phoneme classification, everything is in `wavlm_base_plus_phonemizer.ipynb`.
   - As a bonus step, you may want to get phonemes from raw texts. This is where `ipa_encoder.py` comes in.
   - You can also use the [Phonemizer Module](#phonemizer-module) (see below).

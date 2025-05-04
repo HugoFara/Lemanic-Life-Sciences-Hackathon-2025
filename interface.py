@@ -1,7 +1,9 @@
 """Create a nice interface to interact with the app."""
-from main import speech_recognition
-import gradio as gr
 import os
+
+import gradio as gr
+
+from main import speech_recognition
 
 
 def run_model(wav_file, csv_file, model_type):

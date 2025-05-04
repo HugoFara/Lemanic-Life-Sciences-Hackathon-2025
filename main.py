@@ -1,14 +1,16 @@
-import whisper.pipeline as wis
-from combining_block.combining_block import combine_decoding
+import ast
 
 import pandas as pd
-import ast
+
+import word_segmenter.pipeline
+from combining_block.combining_block import combine_decoding
+
 
 def apply_whisper(wav_file, csv_file, language, output_csv="whisper.csv"):
     """
     Runs the Whisper model on the audio file and saves the output to a CSV file.
     """
-    wis.main_(csv_file, wav_file, language, output_csv)
+    word_segmenter.pipeline.main_(csv_file, wav_file, language, output_csv)
     
 
 def speech_recognition(wav_file, csv_file, model_type):
