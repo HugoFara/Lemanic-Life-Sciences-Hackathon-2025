@@ -58,22 +58,19 @@ def phonemize_text(
     text_to_phoneme = text_to_phoneme_converter.Text2PhonemeConverter(
         language=language, words_to_exclude=[undefined_token]
     )
-    dataset = datasets.Dataset.from_pandas(words_to_phonemize[["file_name"] + new_cols])
+    dataset = datasets.Dataset.from_pandas(words_to_phonemize[new_cols])
+    
+    processed = dataset.map(
+        lambda batch: {
+            out_col: text_to_phoneme.phonemize(batch[out_col])
+            for out_col in new_cols
+        },
+        desc="Phonemizing",
+        batched=True
+    )
     
     for out_col in new_cols:
-        words_to_phonemize[out_col] = dataset.map(
-            lambda batch: {
-                out_col: [
-                    f" {padding_token} ".join(
-                        text_to_phoneme.phonemize(x.split(" "))
-                    )
-                    for x in batch
-                ]
-            },
-            input_columns=[out_col],
-            desc="Phonemizing",
-            batched=True
-        )[out_col]
+        words_to_phonemize[out_col] = processed[out_col] 
 
     phonemized_df = pd.merge(
         dataframe,
