@@ -118,10 +118,9 @@ class Text2PhonemeConverter:
                 add_special_tokens=False,
                 return_tensors="pt",
             )
-            out["input_ids"] = out["input_ids"].to(self.device)
-            out["attention_mask"] = out["attention_mask"].to(self.device)
             predictions = self.model.generate(
-                **out,
+                input_ids=out["input_ids"].to(self.device),
+                attention_mask=out["attention_mask"].to(self.device),
                 num_beams=1,
                 max_length=self.phoneme_lengths[self.language + ".tsv"],
             )
