@@ -1,4 +1,4 @@
-# WE CONSIDER THAT A CSV IS ALWAYS GIVEN
+"""Create a nice interface to interact with the app."""
 from main import speech_recognition
 import gradio as gr
 import os

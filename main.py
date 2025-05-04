@@ -1,27 +1,24 @@
 import whisper.pipeline as wis
 from combining_block.combining_block import combine_decoding
-from first_phoneme import first_phoneme_extraction
 
 import pandas as pd
-import numpy as np
 import ast
 
 def apply_whisper(wav_file, csv_file, language, output_csv="whisper.csv"):
     """
     Runs the Whisper model on the audio file and saves the output to a CSV file.
     """
- 
     wis.main_(csv_file, wav_file, language, output_csv)
     
 
 def speech_recognition(wav_file, csv_file, model_type):
-    
+    """Run the complete pipeline."""
     if model_type == "Phoneme Deletion (french)":
         language = "fr"
     elif model_type == "Decoding (italian)":
         language = "it"
 
-    #Run whisper
+    # Run whisper
     whisper_path = "whisper.csv"
     apply_whisper(wav_file, csv_file, language, whisper_path)
     whisper_output = pd.read_csv(whisper_path)
