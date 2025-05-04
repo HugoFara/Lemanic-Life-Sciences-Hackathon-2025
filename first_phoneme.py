@@ -1,4 +1,4 @@
-from text_to_phoneme_converter import get_french_ipa
+from ipa_encoder import get_french_ipa
 import pandas as pd
 
 def first_phoneme_extraction(data_csv):
