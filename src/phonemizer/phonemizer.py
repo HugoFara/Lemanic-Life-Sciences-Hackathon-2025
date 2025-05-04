@@ -1,8 +1,8 @@
 import json
 import os
 
+import datasets
 import pandas as pd
-import tqdm
 
 import text_to_phoneme_converter
 
@@ -36,42 +36,44 @@ def phonemize_text(
     undefined_token_sep = undefined_token
     padding_token_sep = padding_token
     for in_col, out_col in zip(columns, new_cols):
-        words_to_phonemize[out_col] = words_to_phonemize[in_col].str.replace(
-            " ", padding_token_sep, regex=True
-        )
-
         words_to_phonemize[out_col] = (
-            words_to_phonemize[in_col]
-            .str.replace(".", padding_token_sep, regex=False)
+            words_to_phonemize[in_col].str
+            .replace(r".| ", padding_token_sep, regex=False)
             # Modified regex to handle [UNK] properly:
-            .str.replace(r"\{.*?\}|\<.*?\>|\[.*?\]|\(.*?\)", undefined_token_sep, regex=True)
+            .replace(r"\{.*?\}|\<.*?\>|\[.*?\]|\(.*?\)", undefined_token_sep, regex=True)
             # Handle string boundaries:
-            .str.replace(
+            .replace(
                 rf"^{padding_token}", padding_token + " ", regex=True
             )
             # Start of string
-            .str.replace(
+            .replace(
                 rf"{padding_token}$", " " + padding_token, regex=True
             )
             # End of string
-            .str.replace(rf"^{undefined_token}", undefined_token + " ", regex=True)
-            .str.replace(rf"{undefined_token}$", " " + undefined_token, regex=True)
+            .replace(rf"^{undefined_token}", undefined_token + " ", regex=True)
+            .replace(rf"{undefined_token}$", " " + undefined_token, regex=True)
+            .fillna(undefined_token)
         )
-        words_to_phonemize[out_col] = words_to_phonemize[out_col].fillna(undefined_token)
 
     text_to_phoneme = text_to_phoneme_converter.Text2PhonemeConverter(
         language=language, words_to_exclude=[undefined_token]
     )
-    # Enable pandas integration
-    tqdm.tqdm.pandas()
-
+    dataset = datasets.Dataset.from_pandas(words_to_phonemize[["file_name"] + new_cols])
+    
     for out_col in new_cols:
-        # Add progress bar to your apply()
-        words_to_phonemize[out_col] = words_to_phonemize[out_col].progress_apply(
-            lambda x: f" {padding_token} ".join(
-                text_to_phoneme.phonemize(x.split(" "))
-            )
-        )
+        words_to_phonemize[out_col] = dataset.map(
+            lambda batch: {
+                out_col: [
+                    f" {padding_token} ".join(
+                        text_to_phoneme.phonemize(x.split(" "))
+                    )
+                    for x in batch
+                ]
+            },
+            input_columns=[out_col],
+            desc="Phonemizing",
+            batched=True
+        )[out_col]
 
     phonemized_df = pd.merge(
         dataframe,
@@ -88,7 +90,7 @@ def get_vocabulary_dict(all_phonemes):
     phonemes = " ".join(all_phonemes)
     special_tokens = {"[PAD]": 0, "[UNK]": 1}
     unique_phonemes = set(phonemes.split(" "))
-    unique_phonemes.symmetric_difference_update(special_tokens)
+    unique_phonemes.difference_update(special_tokens)
     output_dict = special_tokens.copy()
     ordered_phonemes = list(unique_phonemes)
     ordered_phonemes.sort()

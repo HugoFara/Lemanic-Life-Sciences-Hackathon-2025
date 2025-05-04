@@ -99,7 +99,8 @@ class Text2PhonemeConverter:
         new_words = []
         for i, word in enumerate(words):
             # First normalize the spacing around special tokens
-            word = re.sub(r"(?<!\s)\[(UNK|PAD)\](?!\s)", r" [\1] ", word)
+            word = re.sub(r"(?<!\s)\[PAD\](?!\s)", r"<pad>", word)
+            word = re.sub(r"(?<!\s)\[UNK\](?!\s)", r"<unk>", word)
             # Then collapse multiple spaces
             word = re.sub(r" +", " ", word).strip()
             if word in self.phone_dict:
@@ -124,7 +125,7 @@ class Text2PhonemeConverter:
                 max_length=self.phoneme_lengths[self.language + ".tsv"],
             )
             phonemes = self.tokenizer.batch_decode(
-                predictions.tolist(), skip_special_tokens=True
+                predictions, skip_special_tokens=True
             )
             for i, phonemized in enumerate(phonemes):
                 phonemes_list[new_words[i][0]] = phonemized
