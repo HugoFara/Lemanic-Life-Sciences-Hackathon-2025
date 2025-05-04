@@ -26,10 +26,10 @@ def phonemize_text(
     :param str padding_token: Token for padding.
     :param int max_rows: Limit the number of processed rows to go faster.
     """
-    df = pd.read_csv(csv_path)
+    dataframe = pd.read_csv(csv_path)
     print(f"Phonemizing {which_coder} from {csv_path}.")
     columns = [f"trial_answer_coder{i}" for i in which_coder]
-    words_to_phonemize = df[["file_name"] + columns]
+    words_to_phonemize = dataframe[["file_name"] + columns]
     if max_rows != -1:
         words_to_phonemize = words_to_phonemize.head(max_rows)
     new_cols = [f"phonemized{i}" for i in which_coder]
@@ -68,14 +68,13 @@ def phonemize_text(
     for out_col in new_cols:
         # Add progress bar to your apply()
         words_to_phonemize[out_col] = words_to_phonemize[out_col].progress_apply(
-            lambda x: text_to_phoneme.phonemize(
-                x.split(" "),
-                padding_token=" " + padding_token + " "
+            lambda x: f" {padding_token} ".join(
+                text_to_phoneme.phonemize(x.split(" "))
             )
         )
 
     phonemized_df = pd.merge(
-        df,
+        dataframe,
         words_to_phonemize[["file_name"] + new_cols],
         on="file_name",
         how="left",

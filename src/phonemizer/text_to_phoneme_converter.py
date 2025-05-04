@@ -88,16 +88,15 @@ class Text2PhonemeConverter:
                     self.phone_dict[word_phonemes[0]] = [word_phonemes[1].split(",")[0]]
                     
 
-    def phonemize(self, words, padding_token=" [PAD] "):
+    def phonemize(self, words):
         """
         Convert text to phonemes using the T5 model.
         
         :param list[str] words: Input text to be converted.
-        :param str padding_token: Token used for padding.
+        :return list[str]: Phonemized words.
         """
         phonemes_list = [""] * len(words)
         new_words = []
-        self.exclude_token.append(padding_token)
         for i, word in enumerate(words):
             # First normalize the spacing around special tokens
             word = re.sub(r"(?<!\s)\[(UNK|PAD)\](?!\s)", r" [\1] ", word)
@@ -136,5 +135,5 @@ class Text2PhonemeConverter:
                 phonemes_list[i] = self.segment_tool(phoneme, ipa=True)
 
         # fill gaps with padding token
-        return padding_token.join(phonemes_list)
+        return phonemes_list
 
