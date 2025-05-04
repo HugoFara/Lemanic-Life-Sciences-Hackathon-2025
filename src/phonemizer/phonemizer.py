@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import tqdm
 
-import ipa_encoder
+import text_to_phoneme_converter
 
 
 def phonemize_text(
@@ -59,7 +59,7 @@ def phonemize_text(
         )
         words_to_phonemize[out_col] = words_to_phonemize[out_col].fillna(undefined_token)
 
-    text_to_phoneme = ipa_encoder.Text2PhonemeConverter(
+    text_to_phoneme = text_to_phoneme_converter.Text2PhonemeConverter(
         language=language, words_to_exclude=[undefined_token]
     )
     # Enable pandas integration
@@ -91,18 +91,13 @@ def get_vocabulary_dict(all_phonemes):
     unique_phonemes = set(phonemes.split(" "))
     unique_phonemes.symmetric_difference_update(special_tokens)
     output_dict = special_tokens.copy()
+    ordered_phonemes = list(unique_phonemes)
+    ordered_phonemes.sort()
     output_dict.update({
         phoneme: i 
-        for i, phoneme in enumerate(unique_phonemes, start=len(special_tokens))
+        for i, phoneme in enumerate(ordered_phonemes, start=len(special_tokens))
     })
     return output_dict
-
-
-def save_vocabulary(vocabulary, output_file):
-    """Save the unique phonemes to a JSON file"""
-    with open(output_file, "w", encoding="utf-8") as file:
-        json.dump(vocabulary, file, ensure_ascii=False, indent=2)
-    print(f"Vocabulary saved as {output_file}")
 
 
 def phonemize_texts(max_rows=-1):
@@ -118,7 +113,7 @@ def phonemize_texts(max_rows=-1):
         "fr": "Phoneme_Deleletion_ground_truth_FR",
         "it": "Decoding_ground_truth_IT"
     }
-    output_paths = [""] * 2
+    output_paths = {}
     for language in ("fr", "it"):
         coders = [1, 2]
         phonemized_dataframe = phonemize_text(
@@ -127,37 +122,39 @@ def phonemize_texts(max_rows=-1):
             language,
             max_rows=max_rows
         )
-        phonemized_dataframe.to_csv(
-            f"{saved_folder}/phonemized_{language}.csv",
-            index=False
-        )
-        output_paths.append(f"{saved_folder}/phonemized_{language}.csv")
+        output_paths[language] = f"{saved_folder}/phonemized_{language}.csv"
+        phonemized_dataframe.to_csv(output_paths[language], index=False)
     return output_paths
 
 
-def regenerate_vocabulary():
+def regenerate_vocabulary(phonemized_files):
     """
     Recreate the vocubalary files and create the phonemized texts.
 
-    :param int max_rows: Maximum number of rows to process.
+    :param phonemized_files: Path to the phonemized files where to get phonemes from.
+    It is in format (language, file_path)
+    :type phonemized_files: dict[str, str]
+
+    :return str: Output file path.
     """
-    saved_folder = "outputs/phonemizer"
     phonemes_folder = "custom_tokenizer"
     os.makedirs(phonemes_folder, exist_ok=True)
     dataseries = []
-    for language in ("fr", "it"):
+    for phonemized_file in phonemized_files.values():
         coders = [1, 2]
-        phonemized_dataframe = pd.read_csv(f"{saved_folder}/phonemized_{language}.csv")
+        phonemized_dataframe = pd.read_csv(phonemized_file)
         for i in coders:
             dataseries.extend(phonemized_dataframe[f"phonemized{i}"].dropna())
 
-    save_vocabulary(
-        get_vocabulary_dict(dataseries),
-        f"{phonemes_folder}/vocab.json"
-    )
-    return f"{phonemes_folder}/vocab.json"
+    # Save the unique phonemes to a JSON file
+    output_file = f"{phonemes_folder}/vocab.json"
+    with open(output_file, "w", encoding="utf-8") as file:
+        json.dump(get_vocabulary_dict(dataseries), file, ensure_ascii=False, indent=2)
+    print(f"Vocabulary saved as {output_file}")
+
+    return output_file
 
 
 if __name__ == "__main__":
-    phonemize_texts(10)
-    regenerate_vocabulary()
+    phonemized_files = phonemize_texts(10)
+    regenerate_vocabulary(phonemized_files)
