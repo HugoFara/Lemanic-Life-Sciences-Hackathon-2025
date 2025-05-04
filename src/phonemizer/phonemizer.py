@@ -3,6 +3,7 @@ import os
 
 import datasets
 import pandas as pd
+import torch
 
 import text_to_phoneme_converter
 
@@ -27,7 +28,6 @@ def phonemize_text(
     :param int max_rows: Limit the number of processed rows to go faster.
     """
     dataframe = pd.read_csv(csv_path)
-    print(f"Phonemizing {which_coder} from {csv_path}.")
     columns = [f"trial_answer_coder{i}" for i in which_coder]
     words_to_phonemize = dataframe[["file_name"] + columns]
     if max_rows != -1:
@@ -56,7 +56,8 @@ def phonemize_text(
         )
 
     text_to_phoneme = text_to_phoneme_converter.Text2PhonemeConverter(
-        language=language, words_to_exclude=[undefined_token]
+        language=language,
+        cuda=torch.cuda.is_available()
     )
     dataset = datasets.Dataset.from_pandas(words_to_phonemize[new_cols])
     
@@ -65,7 +66,7 @@ def phonemize_text(
             out_col: text_to_phoneme.phonemize(batch[out_col])
             for out_col in new_cols
         },
-        desc="Phonemizing",
+        desc=f"Phonemizing {language}",
         batched=True
     )
     
@@ -98,24 +99,20 @@ def get_vocabulary_dict(all_phonemes):
     return output_dict
 
 
-def phonemize_texts(max_rows=-1):
+def phonemize_texts(file_paths, max_rows=-1):
     """
     Recreate the vocubalary files and create the phonemized texts.
 
+    :param dict[str, str] file_paths: (language_name, file_path) for each file to process.
     :param int max_rows: Maximum number of rows to process.
     """
-    data_folder = "Hackathon_ASR"
     saved_folder = "outputs/phonemizer"
     os.makedirs(saved_folder, exist_ok=True)
-    paths = {
-        "fr": "Phoneme_Deleletion_ground_truth_FR",
-        "it": "Decoding_ground_truth_IT"
-    }
     output_paths = {}
-    for language in ("fr", "it"):
+    for language, data_file in file_paths.items():
         coders = [1, 2]
         phonemized_dataframe = phonemize_text(
-            f"{data_folder}/1_Ground_truth/{paths[language]}.csv",
+            data_file,
             coders,
             language,
             max_rows=max_rows
@@ -154,5 +151,9 @@ def regenerate_vocabulary(phonemized_files):
 
 
 if __name__ == "__main__":
-    phonemized_files = phonemize_texts(10)
+    file_paths = {
+        "fr": "Hackathon_ASR/1_Ground_truth/Phoneme_Deleletion_ground_truth_FR.csv",
+        "it": "Hackathon_ASR/1_Ground_truth/Decoding_ground_truth_IT.csv"
+    }
+    phonemized_files = phonemize_texts(file_paths, 10)
     regenerate_vocabulary(phonemized_files)
