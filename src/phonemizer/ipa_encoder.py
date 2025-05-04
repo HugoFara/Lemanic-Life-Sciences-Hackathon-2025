@@ -68,11 +68,11 @@ class Text2PhonemeConverter:
                 ],
                 check=True
             )
-        # SETTING PHONEME LENGTH
+        # Setting phonemes length
         config_path = "configs/phoneme_lengths.json"
         if os.path.exists(config_path):
-            with open(config_path, "r", encoding="utf-8") as f:
-                self.phoneme_lengths = json.load(f)
+            with open(config_path, "r", encoding="utf-8") as file:
+                self.phoneme_lengths = json.load(file)
         else:
             warnings.warn("Loading dummy values for phonemes lengths!")
             self.phoneme_lengths = {
@@ -139,25 +139,3 @@ class Text2PhonemeConverter:
         # fill gaps with padding token
         return padding_token.join(phonemes_list)
 
-
-def extract_unique_phonemes(phoneme_str):
-    """Get the phonemes from a string."""
-    pattern = r"\[PAD\]|\[UNK\]|."
-    phonemes = re.findall(pattern, phoneme_str)
-    # remove ' ' should not be in the list
-    uniques = set([ph for ph in phonemes if ph != " "])
-    return list(uniques)
-
-
-def get_vocab_json(all_phonemes, output_path):
-    """Save the vocab to a JSON file."""
-    phonemes = " ".join(all_phonemes)
-    unique_phonemes = {"[PAD]", "[UNK]"}
-    unique_phonemes.update(phonemes.split(" "))
-    unique_phonemes_dict = {ph: i for i, ph in enumerate(unique_phonemes)}
-    # Save the unique phonemes to a JSON file
-    os.makedirs(output_path, exist_ok=True)
-    final_path = os.path.join(output_path, "vocab.json")
-    with open(final_path, "w", encoding="utf-8") as file:
-        json.dump(unique_phonemes_dict, file, ensure_ascii=False, indent=2)
-    print(f"Vocabulary saved as {final_path}")
