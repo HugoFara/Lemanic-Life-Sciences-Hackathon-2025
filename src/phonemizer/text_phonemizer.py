@@ -8,6 +8,22 @@ import torch
 import text_to_phoneme_converter
 
 
+def phonemized_dataset(dataset, language, on_features):
+    """Take a dataset and convert the requested columns to phonemes."""
+    text_to_phoneme = text_to_phoneme_converter.Text2PhonemeConverter(
+        language=language,
+        cuda=torch.cuda.is_available()
+    )
+    return dataset.map(
+        lambda batch: {
+            col: text_to_phoneme.phonemize(batch[col])
+            for col in on_features
+        },
+        desc=f"Phonemizing {language}",
+        batched=True
+    )
+
+
 def phonemize_text(
     csv_path, 
     which_coder, 
@@ -55,20 +71,9 @@ def phonemize_text(
             .fillna(undefined_token)
         )
 
-    text_to_phoneme = text_to_phoneme_converter.Text2PhonemeConverter(
-        language=language,
-        cuda=torch.cuda.is_available()
-    )
     dataset = datasets.Dataset.from_pandas(words_to_phonemize[new_cols])
     
-    processed = dataset.map(
-        lambda batch: {
-            out_col: text_to_phoneme.phonemize(batch[out_col])
-            for out_col in new_cols
-        },
-        desc=f"Phonemizing {language}",
-        batched=True
-    )
+    processed = phonemized_dataset(dataset, language, new_cols)
     
     for out_col in new_cols:
         words_to_phonemize[out_col] = processed[out_col] 

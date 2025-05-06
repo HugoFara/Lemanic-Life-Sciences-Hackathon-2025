@@ -133,7 +133,11 @@ class Text2PhonemeConverter:
         for i, phoneme in enumerate(phonemes_list):
             # skip excluded tokens of segmentation
             if phoneme not in self.exclude_token:
-                phonemes_list[i] = self.segment_tool(phoneme, ipa=True)
+                try:
+                    phonemes_list[i] = self.segment_tool(phoneme, ipa=True)
+                except IndexError:
+                    # Some phonemes may nbot be recognized
+                    phonemes_list[i] = self.segment_tool(phoneme)
 
         # fill gaps with padding token
         return phonemes_list
