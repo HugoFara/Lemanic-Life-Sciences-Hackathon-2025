@@ -35,7 +35,7 @@ This folder `src/phonemizer` contains tools for phonemizing text data into phone
   - Defines the `Text2PhonemeConverter` class, which converts text into phonemes using the `charsiu/g2p_multilingual_byT5_small_100` model.
   - Also provides utilities to extract and save the set of unique phonemes (`get_vocab_json`).
 
-- `phonemizer.py`:
+- `text_phonemizer.py`:
   - Provides the `phonemize_text` function to phonemize text columns in CSV files.
   - Prepares the text by handling undefined tokens, padding, and formatting.
   - Generates phonemized CSV outputs and a phoneme vocabulary JSON file.
