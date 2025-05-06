@@ -5,19 +5,29 @@ import datasets
 import pandas as pd
 import torch
 
-import text_to_phoneme_converter
+from . import text_to_phoneme_converter
 
 
-def phonemized_dataset(dataset, language, on_features):
-    """Take a dataset and convert the requested columns to phonemes."""
+def phonemized_dataset(dataset, language, in_features, out_features=None):
+    """
+    Take a dataset and convert the requested columns to phonemes.
+    
+    :param datasets.Dataset dataset: Dataset to work on.
+    :param str language: Lanugage to process phonemes to.
+    :param list[str] in_features: Features to as an input string from the dataset.
+    :param list[str] out_features: The output will be mapped on this feature.
+    """
+    if out_features is None:
+        out_features = in_features.copy()
+
     text_to_phoneme = text_to_phoneme_converter.Text2PhonemeConverter(
         language=language,
         cuda=torch.cuda.is_available()
     )
     return dataset.map(
         lambda batch: {
-            col: text_to_phoneme.phonemize(batch[col])
-            for col in on_features
+            out_col: text_to_phoneme.phonemize(batch[in_col])
+            for in_col, out_col in zip(in_features, out_features)
         },
         desc=f"Phonemizing {language}",
         batched=True
