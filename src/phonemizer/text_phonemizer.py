@@ -30,7 +30,8 @@ def phonemized_dataset(dataset, language, in_features, out_features=None):
             for in_col, out_col in zip(in_features, out_features)
         },
         desc=f"Phonemizing {language}",
-        batched=True
+        batched=True,
+        batch_size=300
     )
 
 
