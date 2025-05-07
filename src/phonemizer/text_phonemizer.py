@@ -7,6 +7,8 @@ import torch
 
 from . import text_to_phoneme_converter
 
+VOCAB_FOLDER = "custom_tokenizer"
+VOCAB_FILE = f"{VOCAB_FOLDER}/vocab.json"
 
 def phonemized_dataset(dataset, language, in_features, out_features=None):
     """
@@ -138,32 +140,60 @@ def phonemize_texts(file_paths, max_rows=-1):
     return output_paths
 
 
-def regenerate_vocabulary(phonemized_files):
+def get_all_phonemes(phonemized_files):
     """
-    Recreate the vocubalary files and create the phonemized texts.
+    Get all phonemes from a phonemized file.
 
     :param phonemized_files: Path to the phonemized files where to get phonemes from.
     It is in format (language, file_path)
     :type phonemized_files: dict[str, str]
 
-    :return str: Output file path.
     """
-    phonemes_folder = "custom_tokenizer"
-    os.makedirs(phonemes_folder, exist_ok=True)
     dataseries = []
     for phonemized_file in phonemized_files.values():
         coders = [1, 2]
         phonemized_dataframe = pd.read_csv(phonemized_file)
         for i in coders:
             dataseries.extend(phonemized_dataframe[f"phonemized{i}"].dropna())
+    return dataseries
 
+
+def regenerate_vocabulary(dataseries, output_file=VOCAB_FILE):
+    """
+    Recreate the vocabulary files and create the phonemized texts.
+
+    :param list dataseries: List of all phonemes we have.
+
+    :return str: Output file path.
+    """
     # Save the unique phonemes to a JSON file
-    output_file = f"{phonemes_folder}/vocab.json"
     with open(output_file, "w", encoding="utf-8") as file:
         json.dump(get_vocabulary_dict(dataseries), file, ensure_ascii=False, indent=2)
     print(f"Vocabulary saved as {output_file}")
 
     return output_file
+
+
+def check_regenerate_vocabulary(all_phonemes):
+    """Regenerate the vocabulary if at least one phoneme is missing."""
+    os.makedirs(VOCAB_FOLDER, exist_ok=True)
+    if not os.path.exists(VOCAB_FILE):
+        regenerate_vocabulary(all_phonemes, VOCAB_FILE)
+    else:
+        # File exists, check phonemes
+        with open(VOCAB_FILE, "r") as file:
+            data = json.load(file)
+            registered_phonemes = set(data.keys())
+        
+        proposed = set(all_phonemes)
+        if proposed.difference(registered_phonemes):
+            print("Updating vocabulary")
+            regenerate_vocabulary(all_phonemes, VOCAB_FILE)
+
+    with open(VOCAB_FILE, "r") as file:
+        phonemes_dict = json.load(file)
+        
+    return phonemes_dict
 
 
 if __name__ == "__main__":
@@ -172,4 +202,5 @@ if __name__ == "__main__":
         "it": "Hackathon_ASR/1_Ground_truth/Decoding_ground_truth_IT.csv"
     }
     phonemized_files = phonemize_texts(file_paths, 10)
-    regenerate_vocabulary(phonemized_files)
+    dataseries = get_all_phonemes(phonemized_files)
+    check_regenerate_vocabulary(dataseries)
