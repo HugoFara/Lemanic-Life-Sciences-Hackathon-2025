@@ -32,13 +32,19 @@ class PhonemeMapper(torch.nn.Module):
         """
         input_batch = torch.empty(
             (input_values.shape[0], input_values.shape[1], input_values.shape[2] + 1),
-            dtype=input_values.dtype, device=input_values.device
+            dtype=input_values.dtype,
+            device=input_values.device
         )
 
+        
         if isinstance(language, str):
-            lang_val = torch.ones((input_values.shape[1])) * self.language_classifer(language)
+            lang_val = self.language_classifer(language) * torch.ones((input_values.shape[1]))
         else:
-            lang_val = torch.tensor([self.language_classifer(lang) for lang in language])
+            lang_val = (
+                torch
+                .tensor([[self.language_classifer(lang)] for lang in language])
+                .repeat((1, input_batch.shape[1]))
+            )
 
         input_batch[:, :, 0] = lang_val
         input_batch[:, :, 1:] = input_values

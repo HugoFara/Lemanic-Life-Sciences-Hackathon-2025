@@ -15,10 +15,11 @@ def get_phonemized_datasets(languages, limit_items=LIMIT_ITEMS):
         config = json.load(file)
         huggingface_hub.login(config["hf_token"])
 
-    ds = {}
+    ds = []
     partial = ""
     if limit_items != -1:
-        partial = f"[:{limit_items}]"
+        language_limit = limit_items // len(languages)
+        partial = f"[:{language_limit}]"
 
     for language in languages:
         common_voice_ds = datasets.load_dataset(
@@ -28,14 +29,17 @@ def get_phonemized_datasets(languages, limit_items=LIMIT_ITEMS):
         ).remove_columns(
             ["client_id", "path", "up_votes", "down_votes", "gender", "locale", "segment", "variant"]
         )
+        common_voice_ds = common_voice_ds.add_column("language", [language] * common_voice_ds.num_rows)
+
         # audio and sentence
-        ds[language] = text_phonemizer.phonemized_dataset(
+        ds.append(text_phonemizer.phonemized_dataset(
             common_voice_ds,
             language,
             ["sentence"],
             ["target_phonemes1"]
-        )
-    return ds
+        ))
+    concat_ds = datasets.concatenate_datasets(ds)
+    return concat_ds
 
 
 if __name__ == "__main__":
