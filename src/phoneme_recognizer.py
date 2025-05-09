@@ -18,11 +18,10 @@ class PhonemeRecognizer(torch.nn.Module):
 
     def forward(self, input_values, attention_mask, language):
         # Get WavLM embeddings
-        outputs = self.wavlm(input_values=input_values, attention_mask=attention_mask)
-        hidden_states = outputs.last_hidden_state
+        features = self.wavlm(input_values=input_values, attention_mask=attention_mask)
 
         # Apply the linear layer to get logits for each time step
-        log_probs = self.phoneme_classifier(hidden_states, language)
+        log_probs = self.phoneme_classifier(features.last_hidden_state, language)
 
         return log_probs
     
@@ -51,9 +50,11 @@ class PhonemeRecognizer(torch.nn.Module):
         """
         return self.phoneme_classifier.tokenize(char_list, lenient)
     
-    def get_embedding(self, char_list):
-        tokens = self.tokenize(char_list)
-        out_tensor = torch.zeros((len(tokens), len(self.phoneme_classifier.phonemes_dict)))
-        for i, token_id in enumerate(tokens):
-            out_tensor[i, token_id] = 1
+    def get_embedding(self, char_list_batch):
+        max_tokens = max(map(len, char_list_batch))
+        out_tensor = torch.zeros((len(char_list_batch), max_tokens, len(self.phoneme_classifier.phonemes_dict)))
+        for i, char_list in enumerate(char_list_batch):
+            tokens = self.tokenize(char_list)
+            for j, token_id in enumerate(tokens):
+                out_tensor[i, j, token_id] = 1
         return out_tensor

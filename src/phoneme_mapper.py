@@ -73,10 +73,10 @@ class PhonemeMapper(torch.nn.Module):
             self.phonemes_dict[x] if x in self.phonemes_dict else self.phonemes_dict["[UNK]"]
             for x in char_list
         ])
-    
-    def classify_to_phonemes(self, log_probs):
+
+    def classify_to_phonemes_raw(self, log_probs):
+        """Phoneme classification without CTC."""
         # Simple greedy decoding (for demonstration)
-        # In a real system, you would use beam search with ctcdecode
         predictions = torch.argmax(log_probs, dim=-1).cpu().numpy()
 
         # Convert to phoneme sequences with CTC decoding rules (merge repeats, remove blanks)
@@ -84,16 +84,30 @@ class PhonemeMapper(torch.nn.Module):
         vocab = [""] * len(self.phonemes_dict)
         for phoneme, key in self.phonemes_dict.items():
             vocab[key] = phoneme
+
         for pred_seq in predictions:
-            seq = []
-            prev = -1
-            for p in pred_seq:
-                # Skip blanks (index 0) and repeated phonemes (CTC rules)
-                if p != 0 and p != prev:
-                    # Convert index back to phoneme
-                    seq.append(vocab[p])
-                prev = p
-            phoneme_sequences.append(seq)
+            phoneme_sequences.append([vocab[p] for p in pred_seq])
 
         return phoneme_sequences
+    
+    def apply_ctc_collapse(self, phonemes_sequences):
+        predictions = []
+
+        for pred_seq in phonemes_sequences:
+            seq = []
+            prev = -1
+            for phoneme in pred_seq:
+                # Skip blanks (index 0) and repeated phonemes (CTC rules)
+                if phoneme != "[PAD]" and phoneme != prev:
+                    # Convert index back to phoneme
+                    seq.append(phoneme)
+                prev = phoneme
+            predictions.append(seq)
+        return predictions
+    
+    def classify_to_phonemes(self, log_probs):
+        # Convert to phoneme sequences with CTC decoding rules (merge repeats, remove blanks)
+        phoneme_sequences = self.classify_to_phonemes_raw(log_probs)
+
+        return self.apply_ctc_collapse(phoneme_sequences)
     
