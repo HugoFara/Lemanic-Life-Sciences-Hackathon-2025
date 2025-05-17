@@ -17,13 +17,16 @@ class PhonemeRecognizer(torch.nn.Module):
         self.phoneme_classifier = linear_mapper_model
 
     def forward(self, input_values, attention_mask, language):
+        """
+        Classify audio to a chain of phonemes of the same length.
+        """
         # Get WavLM embeddings
         features = self.wavlm(input_values=input_values, attention_mask=attention_mask)
 
         # Apply the linear layer to get logits for each time step
-        log_probs = self.phoneme_classifier(features.last_hidden_state, language)
+        logits = self.phoneme_classifier(features.last_hidden_state, language)
 
-        return log_probs
+        return logits
     
     def classify_to_phonemes(self, log_probs):
 

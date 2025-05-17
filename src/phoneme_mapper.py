@@ -24,7 +24,7 @@ class PhonemeMapper(torch.nn.Module):
 
     def forward(self, input_values, language):
         """
-        Forward pass.
+        Forward pass, classify input features to a chain of phonemes.
         
         :param torch.Tensor input_values: Extracted features batch to map.
         :param str | Iterable language: Language for the batch, or the language for each element in the batch.
@@ -54,10 +54,7 @@ class PhonemeMapper(torch.nn.Module):
         # Apply the linear layer to get logits for each time step
         logits = self.phoneme_classifier(hidden_states)
 
-        # Apply log softmax for CTC loss
-        log_probs = F.log_softmax(logits, dim=-1)
-
-        return log_probs
+        return logits
     
     def tokenize(self, char_list, lenient=False):
         """
