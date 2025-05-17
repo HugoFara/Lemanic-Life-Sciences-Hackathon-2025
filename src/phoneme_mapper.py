@@ -15,12 +15,28 @@ class PhonemeMapper(torch.nn.Module):
         self.phoneme_classifier = torch.nn.Linear(features_size, num_phonemes)
 
     def language_classifer(self, language):
-        """Return a float identifying each known language."""
+        """
+        Return a float identifying each known language.
+
+        "fr" has value of 0, "it" a value of one.
+        Other languages will have a value increasing in lexicographic order.  
+        
+        :param str language: Language to identify, should be two letters.
+        :return float: Unique identifier, between 0 and 1.
+        """
         if language == "fr":
             return 0
         if language == "it":
             return 1
-        return 0.5
+        
+        # Some random code to encode a two-letter language between 0 and 1
+        # "aa" should be 0+1=1 and "zz" should be 1+2=3
+        codes = (
+            (ord(letter) - ord("a")) / (ord("z") - ord("a")) + i
+            for i, letter in enumerate(language)
+        )
+        # Transform to [0, 1]
+        return (sum(codes) - 1) / 2
 
     def forward(self, input_values, language):
         """
