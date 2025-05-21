@@ -193,3 +193,6 @@ Whisper/__pycache__/
 Combining_block/__pycache__/
 
 config.json
+
+# Model logs for TensorBoard
+runs/
