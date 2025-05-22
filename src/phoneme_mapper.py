@@ -10,8 +10,9 @@ class PhonemeMapper(torch.nn.Module):
         # Add a dropout layer for regularization
         self.dropout = torch.nn.Dropout(0.1)
 
+        self.batch_normalize = torch.nn.BatchNorm1d(features_size)
+
         # Linear layer to map from WavLM hidden states to phoneme classes (including blank)
-        
         self.phoneme_classifier = torch.nn.Linear(features_size, num_phonemes)
 
     def language_classifer(self, language):
@@ -54,7 +55,7 @@ class PhonemeMapper(torch.nn.Module):
 
         
         if isinstance(language, str):
-            lang_val = self.language_classifer(language) * torch.ones((input_values.shape[1]))
+            lang_val = torch.full((input_values.shape[1]), self.language_classifer(language))
         else:
             lang_val = (
                 torch
@@ -64,8 +65,12 @@ class PhonemeMapper(torch.nn.Module):
 
         input_batch[:, :, 0] = lang_val
         input_batch[:, :, 1:] = input_values
+
         # Apply dropout
         hidden_states = self.dropout(input_batch)
+
+        # Normalize
+        hidden_states = self.batch_normalize(hidden_states)
 
         # Apply the linear layer to get logits for each time step
         logits = self.phoneme_classifier(hidden_states)
